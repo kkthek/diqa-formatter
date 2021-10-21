@@ -23,13 +23,13 @@ class Config {
         $this->columnWidths = $columnWidths;
         $this->alignments = $alignments;
         $this->options = is_null($options) ? [] : $options;
+        $this->totalColumnsWidth = array_sum($this->columnWidths);
 
         if ($this->hasPadding()) {
             for($i = 0; $i < count($columnWidths)-1; $i++) {
                 $this->columnWidths[$i]--;
             }
         }
-        $this->totalColumnsWidth = array_sum($this->columnWidths);
     }
 
     /**
