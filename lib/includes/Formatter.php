@@ -6,9 +6,6 @@ namespace DIQA\Formatter;
 class Formatter
 {
 
-    public const LINE_SEPARATOR = 0;
-    public const DOUBLE_LINE_SEPARATOR = 1;
-
     private $config;
 
     /**
@@ -48,6 +45,7 @@ class Formatter
                         }
                     }
                 }
+                $currentLine = $this->highlightIfNecessary($currentLine);
                 $lines[] = $currentLine;
             }
         }
@@ -89,11 +87,11 @@ class Formatter
     {
         $linesOfRow = [];
         for ($c = 0; $c < count($row); $c++) {
-            if ($row[$c] === self::LINE_SEPARATOR) {
-                $separator = str_repeat("-", $this->config->getColumnWidths($c));
+            if ($row[$c] === Config::LINE_SEPARATOR) {
+                $separator = str_repeat(Config::SINGLE_LINE, $this->config->getColumnWidths($c));
                 $linesOfRow[] = [$separator];
-            } else if ($row[$c] === self::DOUBLE_LINE_SEPARATOR) {
-                $separator = str_repeat("=", $this->config->getColumnWidths($c));
+            } else if ($row[$c] === Config::DOUBLE_LINE_SEPARATOR) {
+                $separator = str_repeat(Config::DOUBLE_LINE, $this->config->getColumnWidths($c));
                 $linesOfRow[] = [$separator];
             } else {
                 $linesOfRow[] = TextUtilities::breakText($row[$c], $this->config->getColumnWidths($c));
@@ -116,13 +114,27 @@ class Formatter
      * @return bool true if a separator line was added, otherwise false
      */
     private function handleSeparatorIfNecessary($row, array & $lines) : bool {
-        if ($row === self::LINE_SEPARATOR) {
-            $lines[] = str_repeat("-", $this->config->getTotalColumnsWidth());
+        if ($row === Config::LINE_SEPARATOR) {
+            $lines[] = str_repeat(Config::SINGLE_LINE, $this->config->getTotalColumnsWidth());
             return true;
-        } else if ($row === self::DOUBLE_LINE_SEPARATOR) {
-            $lines[] = str_repeat("=", $this->config->getTotalColumnsWidth());
+        } else if ($row === Config::DOUBLE_LINE_SEPARATOR) {
+            $lines[] = str_repeat(Config::DOUBLE_LINE, $this->config->getTotalColumnsWidth());
             return true;
         }
         return false;
+    }
+
+    /**
+     * Highlight configured substrings with a color
+     *
+     * @param string $s The string with substrings to highlight
+     * @return string the string with color highlights
+     */
+    private function highlightIfNecessary(string $s): string
+    {
+        foreach($this->config->getHighlights() as $word => $color) {
+            $s = str_replace($word, "$color$word".Config::NC, $s);
+        }
+        return $s;
     }
 }

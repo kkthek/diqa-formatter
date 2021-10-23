@@ -18,7 +18,7 @@ class TextUtilities {
         $line = '';
         $token = reset($tokens);
         do {
-            if (strlen($line.$token) > $maxLength) {
+            if (mb_strlen($line.$token) > $maxLength) {
                 $rows[] = $line;
                 $line = $token;
             } else {
@@ -34,17 +34,17 @@ class TextUtilities {
 
     public static function leftPad($text, $length): string
     {
-        return str_repeat(' ', $length - strlen($text)) . $text;
+        return str_repeat(' ', $length - mb_strlen($text)) . $text;
     }
 
     public static function rightPad($text, $length): string
     {
-        return $text . str_repeat(' ', $length - strlen($text));
+        return $text . str_repeat(' ', $length - mb_strlen($text));
     }
 
     public static function centerPad($text, $length): string
     {
-        $padSize = $length - strlen($text);
+        $padSize = $length - mb_strlen($text);
         $leftSize = $padSize % 2 === 0 ? $padSize / 2 : ($padSize-1) / 2;
         $rightSize = $padSize % 2 === 0 ? $padSize / 2 : ($padSize+1) / 2;
         return str_repeat(' ', $leftSize) . $text . str_repeat(' ', $rightSize);
@@ -62,7 +62,7 @@ class TextUtilities {
         $tokens = explode(" ", $line);
         $newTokens = [];
         foreach ($tokens as $token) {
-            if (strlen($token) > $maxLength) {
+            if (mb_strlen($token) > $maxLength) {
                 $tokensWithMaxLength = str_split($token, $maxLength);
                 $newTokens = array_merge($newTokens, $tokensWithMaxLength);
             } else {
