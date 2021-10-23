@@ -17,9 +17,11 @@ class Config
 
     public const SINGLE_LINE ="\u{2500}";
     public const DOUBLE_LINE ="\u{2550}";
+    public const PIPE = "\u{2502}";
 
     public const LINE_SEPARATOR = 0;
     public const DOUBLE_LINE_SEPARATOR = 1;
+    public const BORDER_SEPARATOR = 2;
 
     private $columnWidths;
     private $alignments;
@@ -44,7 +46,13 @@ class Config
         $this->highlights = [];
 
         if ($this->hasPadding()) {
-            for ($i = 0; $i < count($columnWidths) - 1; $i++) {
+            for ($i = 0; $i < count($columnWidths) ; $i++) {
+                $this->columnWidths[$i]--;
+            }
+        }
+        if ($this->hasBorder()) {
+            $this->columnWidths[0]--;
+            for ($i = 0; $i < count($columnWidths) ; $i++) {
                 $this->columnWidths[$i]--;
             }
         }
@@ -82,6 +90,16 @@ class Config
     }
 
     /**
+     * Returns number of columns.
+     *
+     * @return int
+     */
+    public function getNumberOfColumns(): int
+    {
+        return count($this->columnWidths);
+    }
+
+    /**
      * Returns total length of columns.
      *
      * @return int
@@ -108,5 +126,10 @@ class Config
     public function hasPadding(): bool
     {
         return isset($this->options['padding']) && $this->options['padding'] === true;
+    }
+
+    public function hasBorder(): bool
+    {
+        return isset($this->options['border']) && $this->options['border'] === true;
     }
 }

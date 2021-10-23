@@ -27,23 +27,43 @@ class Formatter
     public function format(array $rows): string
     {
         $lines = [];
-        foreach ($rows as $row) {
-            if ($this->handleSeparatorIfNecessary($row, $lines)) {
+        if ($this->config->hasBorder()) {
+            $rows = $this->addBorderLines($rows);
+        }
+
+        for ($j = 0; $j < count($rows); $j++) {
+
+            if ($rows[$j] === Config::BORDER_SEPARATOR) {
+                $lines[] = $this->handleBorders($j, count($rows));
                 continue;
             }
-            list($linesOfRow, $maxLines) = $this->breakLinesIfNecessary($row);
+
+            if ($rows[$j] === Config::LINE_SEPARATOR || $rows[$j] === Config::DOUBLE_LINE_SEPARATOR) {
+                $lines[] = $this->handleSeparator($rows[$j]);
+                continue;
+            }
+
+            list($linesOfRow, $maxLines) = $this->breakLinesIfNecessary($rows[$j]);
 
             for ($i = 0; $i < $maxLines; $i++) {
                 $currentLine = '';
                 for ($c = 0; $c < count($linesOfRow); $c++) {
+                    if ($this->config->hasBorder()) {
+                        if ($c < $this->config->getNumberOfColumns()) {
+                            $currentLine .= Config::PIPE;
+                        }
+                    }
+
                     $text = $linesOfRow[$c][$i] ?? '';
                     $columnLine = $this->alignColumn($text, $c);
                     $currentLine .= $columnLine;
                     if ($this->config->hasPadding()) {
-                        if ($c < count($linesOfRow)-1) {
-                            $currentLine .= ' ';
-                        }
+                        $currentLine .= ' ';
                     }
+
+                }
+                if ($this->config->hasBorder()) {
+                    $currentLine .= Config::PIPE;
                 }
                 $currentLine = $this->highlightIfNecessary($currentLine);
                 $lines[] = $currentLine;
@@ -61,7 +81,7 @@ class Formatter
      */
     private function alignColumn(string $text, int $column): string
     {
-        switch($this->config->getAlignments($column)) {
+        switch ($this->config->getAlignments($column)) {
             case Config::LEFT_ALIGN:
             default:
                 $columnLine = TextUtilities::rightPad($text, $this->config->getColumnWidths($column));
@@ -110,18 +130,18 @@ class Formatter
      * Add a separator line if necessary.
      *
      * @param mixed $row all columns of a row
-     * @param array $lines where separators are added
-     * @return bool true if a separator line was added, otherwise false
+     * @return string
      */
-    private function handleSeparatorIfNecessary($row, array & $lines) : bool {
+    private function handleSeparator($row): string
+    {
         if ($row === Config::LINE_SEPARATOR) {
-            $lines[] = str_repeat(Config::SINGLE_LINE, $this->config->getTotalColumnsWidth());
-            return true;
+            return str_repeat(Config::SINGLE_LINE, $this->config->getTotalColumnsWidth());
+
         } else if ($row === Config::DOUBLE_LINE_SEPARATOR) {
-            $lines[] = str_repeat(Config::DOUBLE_LINE, $this->config->getTotalColumnsWidth());
-            return true;
+            return str_repeat(Config::DOUBLE_LINE, $this->config->getTotalColumnsWidth());
+
         }
-        return false;
+        return '';
     }
 
     /**
@@ -132,9 +152,68 @@ class Formatter
      */
     private function highlightIfNecessary(string $s): string
     {
-        foreach($this->config->getHighlights() as $word => $color) {
-            $s = str_replace($word, "$color$word".Config::NC, $s);
+        foreach ($this->config->getHighlights() as $word => $color) {
+            $s = str_replace($word, "$color$word" . Config::NC, $s);
         }
         return $s;
+    }
+
+    /**
+     * Adds for every second line a border separator line.
+     *
+     * @param array $rows
+     * @return array
+     */
+    private function addBorderLines(array $rows): array
+    {
+        $results = [Config::BORDER_SEPARATOR];
+        foreach ($rows as $row) {
+            $results[] = $row;
+            $results[] = Config::BORDER_SEPARATOR;
+
+        }
+        return $results;
+    }
+
+    /**
+     * Renders a border separator line.
+     *
+     * @param int $row
+     * @param $numberOfRows
+     * @return string
+     */
+    private function handleBorders(int $row, $numberOfRows): string
+    {
+        $line = '';
+        $numberOfColumns = $this->config->getNumberOfColumns();
+        $paddingCorrection = $this->config->hasPadding() ? 1 : 0;
+
+        if ($row === 0) {
+            $line .= "\u{250C}";
+            for ($c = 0; $c < $numberOfColumns - 1; $c++) {
+                $line .= str_repeat(Config::SINGLE_LINE, $this->config->getColumnWidths($c) + $paddingCorrection);
+                $line .= "\u{252C}";
+            }
+            $line .= str_repeat(Config::SINGLE_LINE, $this->config->getColumnWidths($numberOfColumns-1) + $paddingCorrection);
+            $line .= "\u{2510}";
+
+        } else if ($row < $numberOfRows-1) {
+            $line .= "\u{251C}";
+            for ($c = 0; $c < $numberOfColumns - 1; $c++) {
+                $line .= str_repeat(Config::SINGLE_LINE, $this->config->getColumnWidths($c) + $paddingCorrection);
+                $line .= "\u{253C}";
+            }
+            $line .= str_repeat(Config::SINGLE_LINE, $this->config->getColumnWidths($numberOfColumns-1) + $paddingCorrection);
+            $line .= "\u{2524}";
+        } else if ($row === $numberOfRows-1) {
+            $line .= "\u{2514}";
+            for ($c = 0; $c < $numberOfColumns - 1; $c++) {
+                $line .= str_repeat(Config::SINGLE_LINE, $this->config->getColumnWidths($c) + $paddingCorrection);
+                $line .= "\u{2534}";;
+            }
+            $line .= str_repeat(Config::SINGLE_LINE, $this->config->getColumnWidths($numberOfColumns-1) + $paddingCorrection);
+            $line .= "\u{2518}";;
+        }
+        return $line;
     }
 }
