@@ -46,7 +46,7 @@ class Config
 
         if ($this->hasPadding()) {
             for ($i = 0; $i < count($columnWidths) ; $i++) {
-                $this->columnWidths[$i]--;
+                $this->columnWidths[$i] -= 2;
             }
         }
         if ($this->hasBorder()) {

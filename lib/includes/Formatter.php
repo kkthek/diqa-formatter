@@ -53,6 +53,9 @@ class Formatter
 
                     $text = $linesOfRow[$c][$i] ?? '';
                     $columnLine = $this->alignColumn($text, $c);
+                    if ($this->config->hasPadding()) {
+                        $currentLine .= ' ';
+                    }
                     $currentLine .= $columnLine;
                     if ($this->config->hasPadding()) {
                         $currentLine .= ' ';
@@ -169,7 +172,7 @@ class Formatter
     {
         $line = '';
         $numberOfColumns = $this->config->getNumberOfColumns();
-        $paddingCorrection = $this->config->hasPadding() ? 1 : 0;
+        $paddingCorrection = $this->config->hasPadding() ? 2 : 0;
 
         if ($row === 0) {
             $line .= "\u{250C}";
