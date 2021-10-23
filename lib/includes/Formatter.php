@@ -27,20 +27,17 @@ class Formatter
     public function format(array $rows): string
     {
         $lines = [];
-        if ($this->config->hasBorder()) {
-            $rows = $this->addBorderLines($rows);
-        }
+
 
         for ($j = 0; $j < count($rows); $j++) {
-
-            if ($rows[$j] === Config::BORDER_SEPARATOR) {
-                $lines[] = $this->handleBorders($j, count($rows));
-                continue;
-            }
 
             if ($rows[$j] === Config::LINE_SEPARATOR || $rows[$j] === Config::DOUBLE_LINE_SEPARATOR) {
                 $lines[] = $this->handleSeparator($rows[$j]);
                 continue;
+            }
+
+            if ($this->config->hasBorder()) {
+                $lines[] = $this->handleBorder($j, count($rows));
             }
 
             list($linesOfRow, $maxLines) = $this->breakLinesIfNecessary($rows[$j]);
@@ -68,6 +65,9 @@ class Formatter
                 $currentLine = $this->highlightIfNecessary($currentLine);
                 $lines[] = $currentLine;
             }
+        }
+        if ($this->config->hasBorder()) {
+            $lines[] = $this->handleBorder(count($rows), count($rows));
         }
         return implode("\n", $lines);
     }
@@ -159,30 +159,13 @@ class Formatter
     }
 
     /**
-     * Adds for every second line a border separator line.
-     *
-     * @param array $rows
-     * @return array
-     */
-    private function addBorderLines(array $rows): array
-    {
-        $results = [Config::BORDER_SEPARATOR];
-        foreach ($rows as $row) {
-            $results[] = $row;
-            $results[] = Config::BORDER_SEPARATOR;
-
-        }
-        return $results;
-    }
-
-    /**
      * Renders a border separator line.
      *
      * @param int $row
      * @param $numberOfRows
      * @return string
      */
-    private function handleBorders(int $row, $numberOfRows): string
+    private function handleBorder(int $row, $numberOfRows): string
     {
         $line = '';
         $numberOfColumns = $this->config->getNumberOfColumns();
@@ -197,7 +180,7 @@ class Formatter
             $line .= str_repeat(Config::SINGLE_LINE, $this->config->getColumnWidths($numberOfColumns-1) + $paddingCorrection);
             $line .= "\u{2510}";
 
-        } else if ($row < $numberOfRows-1) {
+        } else if ($row < $numberOfRows) {
             $line .= "\u{251C}";
             for ($c = 0; $c < $numberOfColumns - 1; $c++) {
                 $line .= str_repeat(Config::SINGLE_LINE, $this->config->getColumnWidths($c) + $paddingCorrection);
@@ -205,7 +188,7 @@ class Formatter
             }
             $line .= str_repeat(Config::SINGLE_LINE, $this->config->getColumnWidths($numberOfColumns-1) + $paddingCorrection);
             $line .= "\u{2524}";
-        } else if ($row === $numberOfRows-1) {
+        } else if ($row === $numberOfRows) {
             $line .= "\u{2514}";
             for ($c = 0; $c < $numberOfColumns - 1; $c++) {
                 $line .= str_repeat(Config::SINGLE_LINE, $this->config->getColumnWidths($c) + $paddingCorrection);

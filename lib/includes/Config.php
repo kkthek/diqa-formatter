@@ -21,7 +21,6 @@ class Config
 
     public const LINE_SEPARATOR = 0;
     public const DOUBLE_LINE_SEPARATOR = 1;
-    public const BORDER_SEPARATOR = 2;
 
     private $columnWidths;
     private $alignments;
