@@ -15,10 +15,6 @@ class Config
     public const BLUE = "\033[0;34m";
     public const NC = "\033[0m"; # No Color
 
-    public const SINGLE_LINE ="\u{2500}";
-    public const DOUBLE_LINE ="\u{2550}";
-    public const PIPE = "\u{2502}";
-
     public const LINE_SEPARATOR = 0;
     public const DOUBLE_LINE_SEPARATOR = 1;
 

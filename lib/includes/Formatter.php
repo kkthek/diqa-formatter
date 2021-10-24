@@ -5,6 +5,9 @@ namespace DIQA\Formatter;
 
 class Formatter
 {
+    private const SINGLE_LINE ="\u{2500}";
+    private const DOUBLE_LINE ="\u{2550}";
+    private const PIPE = "\u{2502}";
 
     private $config;
 
@@ -45,25 +48,20 @@ class Formatter
             for ($i = 0; $i < $maxLines; $i++) {
                 $currentLine = '';
                 for ($c = 0; $c < count($linesOfRow); $c++) {
-                    if ($this->config->hasBorder()) {
-                        if ($c < $this->config->getNumberOfColumns()) {
-                            $currentLine .= Config::PIPE;
-                        }
+                    if ($this->config->hasBorder() && $c < $this->config->getNumberOfColumns()) {
+                        $currentLine .= self::PIPE;
                     }
 
                     $text = $linesOfRow[$c][$i] ?? '';
                     $columnLine = $this->alignColumn($text, $c);
-                    if ($this->config->hasPadding()) {
-                        $currentLine .= ' ';
-                    }
+
+                    $currentLine .= $this->config->hasPadding() ? ' ' : '';
                     $currentLine .= $columnLine;
-                    if ($this->config->hasPadding()) {
-                        $currentLine .= ' ';
-                    }
+                    $currentLine .= $this->config->hasPadding() ? ' ' : '';
 
                 }
                 if ($this->config->hasBorder()) {
-                    $currentLine .= Config::PIPE;
+                    $currentLine .= self::PIPE;
                 }
                 $currentLine = $this->highlightIfNecessary($currentLine);
                 $lines[] = $currentLine;
@@ -76,7 +74,7 @@ class Formatter
     }
 
     /**
-     * Returns aligned text for a column.
+     * Renders aligned text for a column.
      *
      * @param string $text Lines a single row was split into
      * @param int $column The column
@@ -111,10 +109,10 @@ class Formatter
         $linesOfRow = [];
         for ($c = 0; $c < count($row); $c++) {
             if ($row[$c] === Config::LINE_SEPARATOR) {
-                $separator = str_repeat(Config::SINGLE_LINE, $this->config->getColumnWidths($c));
+                $separator = str_repeat(self::SINGLE_LINE, $this->config->getColumnWidths($c));
                 $linesOfRow[] = [$separator];
             } else if ($row[$c] === Config::DOUBLE_LINE_SEPARATOR) {
-                $separator = str_repeat(Config::DOUBLE_LINE, $this->config->getColumnWidths($c));
+                $separator = str_repeat(self::DOUBLE_LINE, $this->config->getColumnWidths($c));
                 $linesOfRow[] = [$separator];
             } else {
                 $linesOfRow[] = TextUtilities::breakText($row[$c], $this->config->getColumnWidths($c));
@@ -138,10 +136,10 @@ class Formatter
     private function handleSeparator($row): string
     {
         if ($row === Config::LINE_SEPARATOR) {
-            return str_repeat(Config::SINGLE_LINE, $this->config->getTotalColumnsWidth());
+            return str_repeat(self::SINGLE_LINE, $this->config->getTotalColumnsWidth());
 
         } else if ($row === Config::DOUBLE_LINE_SEPARATOR) {
-            return str_repeat(Config::DOUBLE_LINE, $this->config->getTotalColumnsWidth());
+            return str_repeat(self::DOUBLE_LINE, $this->config->getTotalColumnsWidth());
 
         }
         return '';
@@ -164,11 +162,11 @@ class Formatter
     /**
      * Renders a border separator line.
      *
-     * @param int $row
-     * @param $numberOfRows
+     * @param int $row current row
+     * @param int $totalNumberOfRows total number of rows
      * @return string
      */
-    private function handleBorder(int $row, $numberOfRows): string
+    private function handleBorder(int $row, int $totalNumberOfRows): string
     {
         $line = '';
         $numberOfColumns = $this->config->getNumberOfColumns();
@@ -177,27 +175,27 @@ class Formatter
         if ($row === 0) {
             $line .= "\u{250C}";
             for ($c = 0; $c < $numberOfColumns - 1; $c++) {
-                $line .= str_repeat(Config::SINGLE_LINE, $this->config->getColumnWidths($c) + $paddingCorrection);
+                $line .= str_repeat(self::SINGLE_LINE, $this->config->getColumnWidths($c) + $paddingCorrection);
                 $line .= "\u{252C}";
             }
-            $line .= str_repeat(Config::SINGLE_LINE, $this->config->getColumnWidths($numberOfColumns-1) + $paddingCorrection);
+            $line .= str_repeat(self::SINGLE_LINE, $this->config->getColumnWidths($numberOfColumns-1) + $paddingCorrection);
             $line .= "\u{2510}";
 
-        } else if ($row < $numberOfRows) {
+        } else if ($row < $totalNumberOfRows) {
             $line .= "\u{251C}";
             for ($c = 0; $c < $numberOfColumns - 1; $c++) {
-                $line .= str_repeat(Config::SINGLE_LINE, $this->config->getColumnWidths($c) + $paddingCorrection);
+                $line .= str_repeat(self::SINGLE_LINE, $this->config->getColumnWidths($c) + $paddingCorrection);
                 $line .= "\u{253C}";
             }
-            $line .= str_repeat(Config::SINGLE_LINE, $this->config->getColumnWidths($numberOfColumns-1) + $paddingCorrection);
+            $line .= str_repeat(self::SINGLE_LINE, $this->config->getColumnWidths($numberOfColumns-1) + $paddingCorrection);
             $line .= "\u{2524}";
-        } else if ($row === $numberOfRows) {
+        } else if ($row === $totalNumberOfRows) {
             $line .= "\u{2514}";
             for ($c = 0; $c < $numberOfColumns - 1; $c++) {
-                $line .= str_repeat(Config::SINGLE_LINE, $this->config->getColumnWidths($c) + $paddingCorrection);
+                $line .= str_repeat(self::SINGLE_LINE, $this->config->getColumnWidths($c) + $paddingCorrection);
                 $line .= "\u{2534}";;
             }
-            $line .= str_repeat(Config::SINGLE_LINE, $this->config->getColumnWidths($numberOfColumns-1) + $paddingCorrection);
+            $line .= str_repeat(self::SINGLE_LINE, $this->config->getColumnWidths($numberOfColumns-1) + $paddingCorrection);
             $line .= "\u{2518}";;
         }
         return $line;

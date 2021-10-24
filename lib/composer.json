@@ -23,5 +23,8 @@
     "psr-4": {
       "DIQA\\Formatter\\": "includes/"
     }
+  },
+  "require-dev": {
+    "phpunit/phpunit": "^7"
   }
 }
