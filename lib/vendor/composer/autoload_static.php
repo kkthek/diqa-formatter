@@ -70,6 +70,7 @@ class ComposerStaticInit301754c5125c88336956ae437b653c21
         'DIQA\\Formatter\\' => 
         array (
             0 => __DIR__ . '/../..' . '/includes',
+            1 => __DIR__ . '/../..' . '/test',
         ),
         'Composer\\Installers\\' => 
         array (

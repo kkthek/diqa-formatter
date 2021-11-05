@@ -115,7 +115,7 @@ class Formatter
                 $separator = str_repeat(self::DOUBLE_LINE, $this->config->getColumnWidths($c));
                 $linesOfRow[] = [$separator];
             } else {
-                $linesOfRow[] = TextUtilities::breakText($row[$c], $this->config->getColumnWidths($c));
+                $linesOfRow[] = TextUtilities::breakText(trim($row[$c]), $this->config->getColumnWidths($c));
             }
         }
 
