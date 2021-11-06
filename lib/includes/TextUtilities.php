@@ -18,8 +18,8 @@ class TextUtilities {
         $line = '';
         $token = reset($tokens);
         do {
-            if (mb_strlen($line.$token) > $maxLength) {
-                $rows[] = $line;
+            if (mb_strlen($line.$token) >= $maxLength) {
+                if ($line != '') $rows[] = $line;
                 $line = $token;
             } else {
                 $line .= $line == '' ? $token : ' '.$token;
@@ -48,6 +48,16 @@ class TextUtilities {
         $leftSize = $padSize % 2 === 0 ? $padSize / 2 : ($padSize-1) / 2;
         $rightSize = $padSize % 2 === 0 ? $padSize / 2 : ($padSize+1) / 2;
         return str_repeat(' ', $leftSize) . $text . str_repeat(' ', $rightSize);
+    }
+
+    public static function leftAndRightPad($leftText, $rightText, $columnWidth): string
+    {
+        return $leftText . str_repeat(' ', $columnWidth - mb_strlen($leftText) - mb_strlen($rightText)) . $rightText;
+    }
+
+    public static function exceedsColumnWidth($leftText, $rightText, $columnWidth): bool
+    {
+        return mb_strlen($leftText) + mb_strlen($rightText) > $columnWidth;
     }
 
     /**

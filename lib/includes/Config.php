@@ -2,12 +2,15 @@
 
 namespace DIQA\Formatter;
 
+use Exception;
+
 class Config
 {
 
     public const RIGHT_ALIGN = 0;
     public const LEFT_ALIGN = 1;
     public const CENTER_ALIGN = 2;
+    public const LEFT_AND_RIGHT_ALIGN = 3;
 
     public const RED = "\033[0;31m";
     public const GREEN = "\033[0;32m";
@@ -31,11 +34,15 @@ class Config
      * @param array $columnWidths array of column widths (in characters)
      * @param array|null $alignments array of column alignments
      * @param array|null $options Options
+     * @throws Exception in case the configuration is inconsistent
      */
     public function __construct(array $columnWidths, array $alignments = null, array $options = null)
     {
         $this->columnWidths = $columnWidths;
         $this->alignments = $alignments;
+        if (count($alignments) !== count($columnWidths)) {
+            throw new Exception("Number of columns and alignments must match");
+        }
         $this->options = is_null($options) ? [] : $options;
         $this->totalColumnsWidth = array_sum($this->columnWidths);
         $this->highlights = [];
@@ -108,9 +115,9 @@ class Config
      * Returns alignment for a column.
      *
      * @param int $index of column
-     * @return array|null
+     * @return int
      */
-    public function getAlignments(int $index)
+    public function getAlignments(int $index): int
     {
         if (is_null($this->alignments)) {
             return self::LEFT_ALIGN;

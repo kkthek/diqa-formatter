@@ -21,6 +21,11 @@ class Formatter
         $this->config = $config;
     }
 
+    public function formatLine(... $columns): string
+    {
+        return $this->format([$columns]);
+    }
+
     /**
      * Formats text according to set configuration.
      *
@@ -76,22 +81,31 @@ class Formatter
     /**
      * Renders aligned text for a column.
      *
-     * @param string $text Lines a single row was split into
+     * @param mixed $columnValue Lines a single row was split into
      * @param int $column The column
      * @return string
      */
-    private function alignColumn(string $text, int $column): string
+    private function alignColumn($columnValue, int $column): string
     {
         switch ($this->config->getAlignments($column)) {
             case Config::LEFT_ALIGN:
             default:
-                $columnLine = TextUtilities::rightPad($text, $this->config->getColumnWidths($column));
+                $columnLine = TextUtilities::rightPad($columnValue, $this->config->getColumnWidths($column));
                 break;
             case Config::RIGHT_ALIGN:
-                $columnLine = TextUtilities::leftPad($text, $this->config->getColumnWidths($column));
+                $columnLine = TextUtilities::leftPad($columnValue, $this->config->getColumnWidths($column));
                 break;
             case Config::CENTER_ALIGN:
-                $columnLine = TextUtilities::centerPad($text, $this->config->getColumnWidths($column));
+                $columnLine = TextUtilities::centerPad($columnValue, $this->config->getColumnWidths($column));
+                break;
+            case Config::LEFT_AND_RIGHT_ALIGN:
+                // if line consists of left and right part do left and right alignment
+                // otherwise just do left alignment
+                if (is_array($columnValue)) {
+                    $columnLine = TextUtilities::leftAndRightPad($columnValue[0], $columnValue[1], $this->config->getColumnWidths($column));
+                } else {
+                    $columnLine = TextUtilities::rightPad($columnValue, $this->config->getColumnWidths($column));
+                }
                 break;
         }
         return $columnLine;
@@ -114,6 +128,18 @@ class Formatter
             } else if ($row[$c] === Config::DOUBLE_LINE_SEPARATOR) {
                 $separator = str_repeat(self::DOUBLE_LINE, $this->config->getColumnWidths($c));
                 $linesOfRow[] = [$separator];
+            } else if (is_array($row[$c])) {
+                if (count($row[$c]) !== 2) {
+                    continue;
+                }
+                // column consists of left and right part used for left-right alignment
+                // if too long, treat it as normal line
+                if (!TextUtilities::exceedsColumnWidth($row[$c][0], $row[$c][1], $this->config->getColumnWidths($c))) {
+                    $linesOfRow[] = [$row[$c]];
+                } else {
+                    $row[$c] = $row[$c][0] . " " . $row[$c][1];
+                    $linesOfRow[] = TextUtilities::breakText(trim($row[$c]), $this->config->getColumnWidths($c));
+                }
             } else {
                 $linesOfRow[] = TextUtilities::breakText(trim($row[$c]), $this->config->getColumnWidths($c));
             }
