@@ -7,7 +7,7 @@ final class AlignmentTest extends TestCase
 {
     use Tools;
 
-    public function testAllAlignments(): void
+    public function testLeftRightCenterAlignments(): void
     {
         $config = new Config(
             [20, 30, 30],

@@ -12,11 +12,6 @@ class Config
     public const CENTER_ALIGN = 2;
     public const LEFT_AND_RIGHT_ALIGN = 3;
 
-    public const RED = "\033[0;31m";
-    public const BLACK_WITH_RED_BACKGROUND = "\033[0;30;41m";
-    public const GREEN = "\033[0;32m";
-    public const ORANGE = "\033[0;33m";
-    public const BLUE = "\033[0;34m";
     public const NC = "\033[0m"; # No Color
 
     public const LINE_SEPARATOR = 0;
@@ -41,7 +36,7 @@ class Config
     {
         $this->columnWidths = $columnWidths;
         $this->alignments = $alignments;
-        if (count($alignments) !== count($columnWidths)) {
+        if (!is_null($alignments) && count($alignments) !== count($columnWidths)) {
             throw new Exception("Number of columns and alignments must match");
         }
         $this->options = is_null($options) ? [] : $options;
@@ -65,10 +60,10 @@ class Config
      * Highlights $word with $color.
      *
      * @param string $word the word to highlight with color
-     * @param string $color color to use
+     * @param Color $color color to use
      * @param mixed $column column where to highlight only (optional)
      */
-    public function highlightWord(string $word, string $color, $column = NULL) {
+    public function highlightWord(string $word, Color $color, $column = NULL) {
         $this->highlights[$word] = [ 'color' => $color, 'column' => $column ];
     }
 
@@ -129,11 +124,11 @@ class Config
 
     public function hasPadding(): bool
     {
-        return isset($this->options['padding']) && $this->options['padding'] === true;
+        return $this->options['padding'] ?? false;
     }
 
     public function hasBorder(): bool
     {
-        return isset($this->options['border']) && $this->options['border'] === true;
+        return $this->options['border'] ?? false;
     }
 }

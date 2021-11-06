@@ -36,7 +36,6 @@ class Formatter
     {
         $lines = [];
 
-
         for ($j = 0; $j < count($rows); $j++) {
 
             if ($rows[$j] === Config::LINE_SEPARATOR || $rows[$j] === Config::DOUBLE_LINE_SEPARATOR) {
@@ -180,7 +179,7 @@ class Formatter
     private function highlightIfNecessary(string $s, int $column): string
     {
         foreach ($this->config->getHighlights() as $word => $colorDescriptor) {
-            $color = $colorDescriptor['color'];
+            $color = $colorDescriptor['color']->getColorString();
             if (is_null($colorDescriptor['column']) || $colorDescriptor['column'] === $column) {
                 $s = str_replace($word, "$color$word" . Config::NC, $s);
             }

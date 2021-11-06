@@ -18,22 +18,24 @@ final class ColorTest extends TestCase
             [Config::LEFT_ALIGN, Config::CENTER_ALIGN, Config::RIGHT_ALIGN],
             ['padding' => false, 'border' => false]
         );
-        $config->highlightWord("OK", Config::GREEN);
+        $greenColor = Color::fromColor(Color::GREEN);
+        $config->highlightWord("OK", $greenColor);
 
         $formatter = new Formatter($config);
 
         $formattedOutput = $formatter->format([
             ["row 1 column 1", "row 1 column 2", "[ERROR]"],
-            ["row 3 column 1", "row 3 column 2", "[OK]"],
+            ["row 2 column 1", "row 2 column 2", "[OK]"],
         ]);
 
         print "\n$formattedOutput";
 
         $expectedOutput = <<<EOT
 row 1 column 1              row 1 column 2                               [ERROR]
-row 3 column 1              row 3 column 2                                  [OK]
+row 2 column 1              row 2 column 2                                  [<OK>]
 EOT;
-        $expectedOutput = str_replace("OK", Config::GREEN."OK".Config::NC, $expectedOutput);
+
+        $expectedOutput = self::highlightWithColor($expectedOutput, "OK", $greenColor);
 
         $this->assertEquals(
             self::normalize($expectedOutput),
@@ -51,22 +53,23 @@ EOT;
             [Config::LEFT_ALIGN, Config::CENTER_ALIGN, Config::RIGHT_ALIGN],
             ['padding' => false, 'border' => false]
         );
-        $config->highlightWord("OK", Config::GREEN, 2);
+        $greenColor = Color::fromColor(Color::GREEN);
+        $config->highlightWord("OK", $greenColor, 2);
 
         $formatter = new Formatter($config);
 
         $formattedOutput = $formatter->format([
             ["row 1 column 1", "row 1 column 2", "[ERROR]"],
-            ["row 3 column 1", "row 3 OK column 2", "[OK]"],
+            ["row 2 column 1", "row 2 OK column 2", "[OK]"],
         ]);
 
         print "\n$formattedOutput";
 
         $expectedOutput = <<<EOT
 row 1 column 1              row 1 column 2                               [ERROR]
-row 3 column 1            row 3 OK column 2                                 [OK]
+row 2 column 1            row 2 OK column 2                                 [<OK>]
 EOT;
-        $expectedOutput = str_replace("[OK]", "[".Config::GREEN."OK".Config::NC."]", $expectedOutput);
+        $expectedOutput = self::highlightWithColor($expectedOutput, "OK", $greenColor);
 
         $this->assertEquals(
             self::normalize($expectedOutput),
@@ -84,22 +87,23 @@ EOT;
             [Config::LEFT_ALIGN, Config::CENTER_ALIGN, Config::RIGHT_ALIGN],
             ['padding' => false, 'border' => false]
         );
-        $config->highlightWord("OK", Config::BLACK_WITH_RED_BACKGROUND);
+        $blackWithRedBgd = Color::fromColor(Color::LIGHT_GREY, Color::RED);
+        $config->highlightWord("OK", $blackWithRedBgd);
 
         $formatter = new Formatter($config);
 
         $formattedOutput = $formatter->format([
             ["row 1 column 1", "row 1 column 2", "[ERROR]"],
-            ["row 3 column 1", "row 3 column 2", "[OK]"],
+            ["row 2 column 1", "row 2 column 2", "[OK]"],
         ]);
 
         print "\n$formattedOutput";
 
         $expectedOutput = <<<EOT
 row 1 column 1              row 1 column 2                               [ERROR]
-row 3 column 1              row 3 column 2                                  [OK]
+row 2 column 1              row 2 column 2                                  [<OK>]
 EOT;
-        $expectedOutput = str_replace("OK", Config::BLACK_WITH_RED_BACKGROUND."OK".Config::NC, $expectedOutput);
+        $expectedOutput = self::highlightWithColor($expectedOutput, "OK", $blackWithRedBgd);
 
         $this->assertEquals(
             self::normalize($expectedOutput),
