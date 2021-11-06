@@ -60,6 +60,7 @@ class Formatter
                     $text = $linesOfRow[$c][$i] ?? '';
                     $columnLine = $this->alignColumn($text, $c);
 
+                    $columnLine = $this->highlightIfNecessary($columnLine, $c);
                     $currentLine .= $this->config->hasPadding() ? ' ' : '';
                     $currentLine .= $columnLine;
                     $currentLine .= $this->config->hasPadding() ? ' ' : '';
@@ -68,7 +69,6 @@ class Formatter
                 if ($this->config->hasBorder()) {
                     $currentLine .= self::PIPE;
                 }
-                $currentLine = $this->highlightIfNecessary($currentLine);
                 $lines[] = $currentLine;
             }
         }
@@ -177,10 +177,13 @@ class Formatter
      * @param string $s The string with substrings to highlight
      * @return string the string with color highlights
      */
-    private function highlightIfNecessary(string $s): string
+    private function highlightIfNecessary(string $s, int $column): string
     {
-        foreach ($this->config->getHighlights() as $word => $color) {
-            $s = str_replace($word, "$color$word" . Config::NC, $s);
+        foreach ($this->config->getHighlights() as $word => $colorDescriptor) {
+            $color = $colorDescriptor['color'];
+            if (is_null($colorDescriptor['column']) || $colorDescriptor['column'] === $column) {
+                $s = str_replace($word, "$color$word" . Config::NC, $s);
+            }
         }
         return $s;
     }

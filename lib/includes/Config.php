@@ -13,6 +13,7 @@ class Config
     public const LEFT_AND_RIGHT_ALIGN = 3;
 
     public const RED = "\033[0;31m";
+    public const BLACK_WITH_RED_BACKGROUND = "\033[0;30;41m";
     public const GREEN = "\033[0;32m";
     public const ORANGE = "\033[0;33m";
     public const BLUE = "\033[0;34m";
@@ -63,11 +64,12 @@ class Config
     /**
      * Highlights $word with $color.
      *
-     * @param $word
-     * @param $color
+     * @param string $word the word to highlight with color
+     * @param string $color color to use
+     * @param mixed $column column where to highlight only (optional)
      */
-    public function highlightWord($word, $color) {
-        $this->highlights[$word] = $color;
+    public function highlightWord(string $word, string $color, $column = NULL) {
+        $this->highlights[$word] = [ 'color' => $color, 'column' => $column ];
     }
 
     /**
