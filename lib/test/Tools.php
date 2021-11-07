@@ -16,6 +16,6 @@ trait Tools {
      * @return array|string|string[]
      */
     static function highlightWithColor($text, $substring, $color) {
-        return str_replace("<$substring>", $color->getColorString()."$substring".Config::NC, $text);
+        return str_replace("<$substring>", $color->getColorString()."$substring"."\033[0m", $text);
     }
 }

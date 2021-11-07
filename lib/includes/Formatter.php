@@ -2,12 +2,14 @@
 
 namespace DIQA\Formatter;
 
+use Exception;
 
 class Formatter
 {
-    private const SINGLE_LINE ="\u{2500}";
-    private const DOUBLE_LINE ="\u{2550}";
+    private const SINGLE_LINE = "\u{2500}";
+    private const DOUBLE_LINE = "\u{2550}";
     private const PIPE = "\u{2502}";
+    private const NC = "\033[0m"; # No Color
 
     private $config;
 
@@ -21,7 +23,7 @@ class Formatter
         $this->config = $config;
     }
 
-    public function formatLine(... $columns): string
+    public function formatLine(...$columns): string
     {
         return $this->format([$columns]);
     }
@@ -34,47 +36,25 @@ class Formatter
      */
     public function format(array $rows): string
     {
-        $lines = [];
+        $resultLines = [];
 
         for ($j = 0; $j < count($rows); $j++) {
 
             if ($rows[$j] === Config::LINE_SEPARATOR || $rows[$j] === Config::DOUBLE_LINE_SEPARATOR) {
-                $lines[] = $this->handleSeparator($rows[$j]);
+                $resultLines[] = $this->handleSeparator($rows[$j]);
                 continue;
             }
 
             if ($this->config->hasBorder()) {
-                $lines[] = $this->handleBorder($j, count($rows));
+                $resultLines[] = $this->handleBorder($j, count($rows));
             }
 
-            list($linesOfRow, $maxLines) = $this->breakLinesIfNecessary($rows[$j]);
-
-            for ($i = 0; $i < $maxLines; $i++) {
-                $currentLine = '';
-                for ($c = 0; $c < count($linesOfRow); $c++) {
-                    if ($this->config->hasBorder() && $c < $this->config->getNumberOfColumns()) {
-                        $currentLine .= self::PIPE;
-                    }
-
-                    $text = $linesOfRow[$c][$i] ?? '';
-                    $columnLine = $this->alignColumn($text, $c);
-
-                    $columnLine = $this->highlightIfNecessary($columnLine, $c);
-                    $currentLine .= $this->config->hasPadding() ? ' ' : '';
-                    $currentLine .= $columnLine;
-                    $currentLine .= $this->config->hasPadding() ? ' ' : '';
-
-                }
-                if ($this->config->hasBorder()) {
-                    $currentLine .= self::PIPE;
-                }
-                $lines[] = $currentLine;
-            }
+            $this->formatOneLine($rows[$j], $resultLines);
         }
         if ($this->config->hasBorder()) {
-            $lines[] = $this->handleBorder(count($rows), count($rows));
+            $resultLines[] = $this->handleBorder(count($rows), count($rows));
         }
-        return implode("\n", $lines);
+        return implode("\n", $resultLines);
     }
 
     /**
@@ -83,27 +63,36 @@ class Formatter
      * @param mixed $columnValue Lines a single row was split into
      * @param int $column The column
      * @return string
+     * @throws Exception
      */
     private function alignColumn($columnValue, int $column): string
     {
         switch ($this->config->getAlignments($column)) {
             case Config::LEFT_ALIGN:
             default:
-                $columnLine = TextUtilities::rightPad($columnValue, $this->config->getColumnWidths($column));
+                $this->checkColumnInput($columnValue);
+            $columnLine = TextUtilities::rightPad($columnValue, $this->config->getColumnWidths($column),
+                    $this->config->paddingChar());
                 break;
             case Config::RIGHT_ALIGN:
-                $columnLine = TextUtilities::leftPad($columnValue, $this->config->getColumnWidths($column));
+                $this->checkColumnInput($columnValue);
+                $columnLine = TextUtilities::leftPad($columnValue, $this->config->getColumnWidths($column),
+                    $this->config->paddingChar());
                 break;
             case Config::CENTER_ALIGN:
-                $columnLine = TextUtilities::centerPad($columnValue, $this->config->getColumnWidths($column));
+                $this->checkColumnInput($columnValue);
+                $columnLine = TextUtilities::centerPad($columnValue, $this->config->getColumnWidths($column),
+                    $this->config->paddingChar());
                 break;
             case Config::LEFT_AND_RIGHT_ALIGN:
                 // if line consists of left and right part do left and right alignment
                 // otherwise just do left alignment
                 if (is_array($columnValue)) {
-                    $columnLine = TextUtilities::leftAndRightPad($columnValue[0], $columnValue[1], $this->config->getColumnWidths($column));
+                    $columnLine = TextUtilities::leftAndRightPad($columnValue[0], $columnValue[1],
+                        $this->config->getColumnWidths($column), $this->config->paddingChar());
                 } else {
-                    $columnLine = TextUtilities::rightPad($columnValue, $this->config->getColumnWidths($column));
+                    $columnLine = TextUtilities::rightPad($columnValue, $this->config->getColumnWidths($column),
+                        $this->config->paddingChar());
                 }
                 break;
         }
@@ -114,8 +103,9 @@ class Formatter
      * Breaks a long text for a column in several short ones that fit the column in multiple lines.
      *
      * @param array $row columns of a row
-     * @return array $linesOfRow = 2-dim array of columns and lines per column
-     *               $maxLines = maximum size of lines for a column
+     * @return array $linesOfRow = 2-dim array of columns and lines per column. usually columns do not have same
+     * amount of lines
+     *
      */
     private function breakLinesIfNecessary(array $row): array
     {
@@ -144,12 +134,7 @@ class Formatter
             }
         }
 
-        $sizes = array_map(function ($e) {
-            return count($e);
-        }, $linesOfRow);
-        $maxLines = max($sizes);
-
-        return [$linesOfRow, $maxLines];
+        return $linesOfRow;
     }
 
     /**
@@ -181,7 +166,7 @@ class Formatter
         foreach ($this->config->getHighlights() as $word => $colorDescriptor) {
             $color = $colorDescriptor['color']->getColorString();
             if (is_null($colorDescriptor['column']) || $colorDescriptor['column'] === $column) {
-                $s = str_replace($word, "$color$word" . Config::NC, $s);
+                $s = str_replace($word, "$color$word" . self::NC, $s);
             }
         }
         return $s;
@@ -206,7 +191,7 @@ class Formatter
                 $line .= str_repeat(self::SINGLE_LINE, $this->config->getColumnWidths($c) + $paddingCorrection);
                 $line .= "\u{252C}";
             }
-            $line .= str_repeat(self::SINGLE_LINE, $this->config->getColumnWidths($numberOfColumns-1) + $paddingCorrection);
+            $line .= str_repeat(self::SINGLE_LINE, $this->config->getColumnWidths($numberOfColumns - 1) + $paddingCorrection);
             $line .= "\u{2510}";
 
         } else if ($row < $totalNumberOfRows) {
@@ -215,7 +200,7 @@ class Formatter
                 $line .= str_repeat(self::SINGLE_LINE, $this->config->getColumnWidths($c) + $paddingCorrection);
                 $line .= "\u{253C}";
             }
-            $line .= str_repeat(self::SINGLE_LINE, $this->config->getColumnWidths($numberOfColumns-1) + $paddingCorrection);
+            $line .= str_repeat(self::SINGLE_LINE, $this->config->getColumnWidths($numberOfColumns - 1) + $paddingCorrection);
             $line .= "\u{2524}";
         } else if ($row === $totalNumberOfRows) {
             $line .= "\u{2514}";
@@ -223,9 +208,60 @@ class Formatter
                 $line .= str_repeat(self::SINGLE_LINE, $this->config->getColumnWidths($c) + $paddingCorrection);
                 $line .= "\u{2534}";;
             }
-            $line .= str_repeat(self::SINGLE_LINE, $this->config->getColumnWidths($numberOfColumns-1) + $paddingCorrection);
+            $line .= str_repeat(self::SINGLE_LINE, $this->config->getColumnWidths($numberOfColumns - 1) + $paddingCorrection);
             $line .= "\u{2518}";;
         }
         return $line;
+    }
+
+    /**
+     * Formats one line of the input.
+     *
+     * @param array $inputLine Columns of the line
+     * @param array $resultLines output lines
+     */
+    private function formatOneLine(array $inputLine, array &$resultLines)
+    {
+        $wrappedInputLines = $this->breakLinesIfNecessary($inputLine);
+
+        // get maximum number of lines of all columns
+        $sizes = array_map(function ($e) {
+            return count($e);
+        }, $wrappedInputLines);
+        $maxLines = max($sizes);
+
+        for ($i = 0; $i < $maxLines; $i++) {
+            $currentLine = '';
+            for ($c = 0; $c < count($wrappedInputLines); $c++) {
+                if ($this->config->hasBorder() && $c < $this->config->getNumberOfColumns()) {
+                    $currentLine .= self::PIPE;
+                }
+
+                $text = $wrappedInputLines[$c][$i] ?? '';
+                $columnLine = $this->alignColumn($text, $c);
+
+                $columnLine = $this->highlightIfNecessary($columnLine, $c);
+                $currentLine .= $this->config->hasPadding() ? $this->config->paddingChar() : '';
+                $currentLine .= $columnLine;
+                $currentLine .= $this->config->hasPadding() ? $this->config->paddingChar() : '';
+
+            }
+            if ($this->config->hasBorder()) {
+                $currentLine .= self::PIPE;
+            }
+            $resultLines[] = $currentLine;
+        }
+
+    }
+
+    /**
+     * @param $columnValue
+     * @throws Exception
+     */
+    private function checkColumnInput($columnValue): void
+    {
+        if (is_array($columnValue)) {
+            throw new Exception("Detected array where should be string. Wrong alignment used?");
+        }
     }
 }

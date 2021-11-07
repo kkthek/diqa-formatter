@@ -12,8 +12,6 @@ class Config
     public const CENTER_ALIGN = 2;
     public const LEFT_AND_RIGHT_ALIGN = 3;
 
-    public const NC = "\033[0m"; # No Color
-
     public const LINE_SEPARATOR = 0;
     public const DOUBLE_LINE_SEPARATOR = 1;
 
@@ -130,5 +128,10 @@ class Config
     public function hasBorder(): bool
     {
         return $this->options['border'] ?? false;
+    }
+
+    public function paddingChar(): string
+    {
+        return $this->options['paddingChar'] ?? ' ';
     }
 }

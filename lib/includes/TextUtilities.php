@@ -32,27 +32,28 @@ class TextUtilities {
         return $rows;
     }
 
-    public static function leftPad($text, $length): string
+    public static function leftPad($text, $length, $paddingChar = ' '): string
     {
-        return str_repeat(' ', $length - mb_strlen($text)) . $text;
+        return str_repeat($paddingChar, $length - mb_strlen($text)) . $text;
     }
 
-    public static function rightPad($text, $length): string
+    public static function rightPad($text, $length, $paddingChar = ' '): string
     {
-        return $text . str_repeat(' ', $length - mb_strlen($text));
+        return $text . str_repeat($paddingChar, $length - mb_strlen($text));
     }
 
-    public static function centerPad($text, $length): string
+    public static function centerPad($text, $length, $paddingChar = ' '): string
     {
         $padSize = $length - mb_strlen($text);
         $leftSize = $padSize % 2 === 0 ? $padSize / 2 : ($padSize-1) / 2;
         $rightSize = $padSize % 2 === 0 ? $padSize / 2 : ($padSize+1) / 2;
-        return str_repeat(' ', $leftSize) . $text . str_repeat(' ', $rightSize);
+        return str_repeat($paddingChar, $leftSize) . $text . str_repeat(' ', $rightSize);
     }
 
-    public static function leftAndRightPad($leftText, $rightText, $columnWidth): string
+    public static function leftAndRightPad($leftText, $rightText, $columnWidth, $paddingChar = ' '): string
     {
-        return $leftText . str_repeat(' ', $columnWidth - mb_strlen($leftText) - mb_strlen($rightText)) . $rightText;
+        $repeatTimes = $columnWidth - mb_strlen($leftText) - mb_strlen($rightText);
+        return $leftText . str_repeat($paddingChar, $repeatTimes) . $rightText;
     }
 
     public static function exceedsColumnWidth($leftText, $rightText, $columnWidth): bool

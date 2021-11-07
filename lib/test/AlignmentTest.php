@@ -46,10 +46,7 @@ EOT;
 
         $formatter = new Formatter($config);
 
-        $formattedOutput = $formatter->format([
-            [["left", "right"]]
-
-        ]);
+        $formattedOutput = $formatter->formatLine(["left", "right"]);
 
         print "\n$formattedOutput";
 
@@ -72,10 +69,10 @@ EOT;
 
         $formatter = new Formatter($config);
 
-        $formattedOutput = $formatter->format([
-            [["left and a super long line", "right and a super long line"]]
+        $formattedOutput = $formatter->formatLine(
+            ["left and a super long line", "right and a super long line"]
 
-        ]);
+        );
 
         print "\n$formattedOutput";
 
@@ -83,6 +80,36 @@ EOT;
 left and a super    
 long line right and 
 a super long line   
+EOT;
+        $this->assertEquals(
+            self::normalize($expectedOutput),
+            self::normalize($formattedOutput)
+        );
+    }
+
+    public function testLeftAndRightTooLongNotBreakableAlignment(): void
+    {
+        $config = new Config(
+            [20],
+            [Config::LEFT_AND_RIGHT_ALIGN],
+            ['padding' => false, 'border' => false]
+        );
+
+        $formatter = new Formatter($config);
+
+        $formattedOutput = $formatter->formatLine(
+            ["Test", "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"]
+
+        );
+
+        print "\n$formattedOutput";
+
+        $expectedOutput = <<<EOT
+Test                
+AAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAA      
 EOT;
         $this->assertEquals(
             self::normalize($expectedOutput),
