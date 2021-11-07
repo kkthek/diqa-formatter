@@ -183,7 +183,7 @@ class Formatter
     {
         $line = '';
         $numberOfColumns = $this->config->getNumberOfColumns();
-        $paddingCorrection = $this->config->hasPadding() ? 2 : 0;
+        $paddingCorrection = $this->config->hasBorderPadding() ? 2 : 0;
 
         if ($row === 0) {
             $line .= "\u{250C}";
@@ -241,9 +241,9 @@ class Formatter
                 $columnLine = $this->alignColumn($text, $c);
 
                 $columnLine = $this->highlightIfNecessary($columnLine, $c);
-                $currentLine .= $this->config->hasPadding() ? $this->config->paddingChar() : '';
+                $currentLine .= $this->config->hasBorderPadding() ? $this->config->paddingChar() : '';
                 $currentLine .= $columnLine;
-                $currentLine .= $this->config->hasPadding() ? $this->config->paddingChar() : '';
+                $currentLine .= $this->config->hasBorderPadding() ? $this->config->paddingChar() : '';
 
             }
             if ($this->config->hasBorder()) {

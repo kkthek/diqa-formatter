@@ -16,7 +16,7 @@ final class ColorTest extends TestCase
         $config = new Config(
             [20, 30, 30],
             [Config::LEFT_ALIGN, Config::CENTER_ALIGN, Config::RIGHT_ALIGN],
-            ['padding' => false, 'border' => false]
+            ['borderPadding' => false, 'border' => false]
         );
         $greenColor = Color::fromColor(Color::GREEN);
         $config->highlightWord("OK", $greenColor);
@@ -51,7 +51,7 @@ EOT;
         $config = new Config(
             [20, 30, 30],
             [Config::LEFT_ALIGN, Config::CENTER_ALIGN, Config::RIGHT_ALIGN],
-            ['padding' => false, 'border' => false]
+            ['borderPadding' => false, 'border' => false]
         );
         $greenColor = Color::fromColor(Color::GREEN);
         $config->highlightWord("OK", $greenColor, 2);
@@ -85,7 +85,7 @@ EOT;
         $config = new Config(
             [20, 30, 30],
             [Config::LEFT_ALIGN, Config::CENTER_ALIGN, Config::RIGHT_ALIGN],
-            ['padding' => false, 'border' => false]
+            ['borderPadding' => false, 'border' => false]
         );
         $blackWithRedBgd = Color::fromColor(Color::LIGHT_GREY, Color::RED);
         $config->highlightWord("OK", $blackWithRedBgd);

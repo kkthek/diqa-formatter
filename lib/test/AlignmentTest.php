@@ -12,7 +12,7 @@ final class AlignmentTest extends TestCase
         $config = new Config(
             [20, 30, 30],
             [Config::LEFT_ALIGN, Config::CENTER_ALIGN, Config::RIGHT_ALIGN],
-            ['padding' => false, 'border' => false]
+            ['borderPadding' => false, 'border' => false]
         );
 
         $formatter = new Formatter($config);
@@ -41,7 +41,7 @@ EOT;
         $config = new Config(
             [20],
             [Config::LEFT_AND_RIGHT_ALIGN],
-            ['padding' => false, 'border' => false]
+            ['borderPadding' => false, 'border' => false]
         );
 
         $formatter = new Formatter($config);
@@ -64,7 +64,7 @@ EOT;
         $config = new Config(
             [20],
             [Config::LEFT_AND_RIGHT_ALIGN],
-            ['padding' => false, 'border' => false]
+            ['borderPadding' => false, 'border' => false]
         );
 
         $formatter = new Formatter($config);
@@ -92,7 +92,7 @@ EOT;
         $config = new Config(
             [20],
             [Config::LEFT_AND_RIGHT_ALIGN],
-            ['padding' => false, 'border' => false]
+            ['borderPadding' => false, 'border' => false]
         );
 
         $formatter = new Formatter($config);

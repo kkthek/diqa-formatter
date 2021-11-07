@@ -12,7 +12,7 @@ final class GeneralTest extends TestCase
         $config = new Config(
             [20, 30, 30],
             [Config::LEFT_ALIGN, Config::CENTER_ALIGN, Config::RIGHT_ALIGN],
-            ['padding' => false, 'border' => false]
+            ['borderPadding' => false, 'border' => false]
         );
 
         $formatter = new Formatter($config);

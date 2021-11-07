@@ -41,7 +41,7 @@ class Config
         $this->totalColumnsWidth = array_sum($this->columnWidths);
         $this->highlights = [];
 
-        if ($this->hasPadding()) {
+        if ($this->hasBorderPadding()) {
             for ($i = 0; $i < count($columnWidths) ; $i++) {
                 $this->columnWidths[$i] -= 2;
             }
@@ -120,9 +120,9 @@ class Config
         return $this->alignments[$index];
     }
 
-    public function hasPadding(): bool
+    public function hasBorderPadding(): bool
     {
-        return $this->options['padding'] ?? false;
+        return $this->options['borderPadding'] ?? false;
     }
 
     public function hasBorder(): bool
