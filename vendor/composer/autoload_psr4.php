@@ -12,6 +12,6 @@ return array(
     'Prophecy\\' => array($vendorDir . '/phpspec/prophecy/src/Prophecy'),
     'Doctrine\\Instantiator\\' => array($vendorDir . '/doctrine/instantiator/src/Doctrine/Instantiator'),
     'DeepCopy\\' => array($vendorDir . '/myclabs/deep-copy/src/DeepCopy'),
-    'DIQA\\Formatter\\' => array($baseDir . '/includes', $baseDir . '/test'),
+    'DIQA\\Formatter\\' => array($baseDir . '/src', $baseDir . '/test'),
     'Composer\\Installers\\' => array($vendorDir . '/composer/installers/src/Composer/Installers'),
 );

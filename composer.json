@@ -21,7 +21,8 @@
   },
   "autoload": {
     "psr-4": {
-      "DIQA\\Formatter\\": ["includes/", "test/"]
+      "DIQA\\Formatter\\": [
+        "src/", "test/"]
     }
   },
   "require-dev": {
