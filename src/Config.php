@@ -12,8 +12,8 @@ class Config
     public const CENTER_ALIGN = 2;
     public const LEFT_AND_RIGHT_ALIGN = 3;
 
-    public const LINE_SEPARATOR = 0;
-    public const DOUBLE_LINE_SEPARATOR = 1;
+    public const LINE_SEPARATOR = "__LINE_SEPERATOR__";
+    public const DOUBLE_LINE_SEPARATOR = "__DOUBLELINE_SEPERATOR__";
 
     private $columnWidths;
     private $alignments;
@@ -133,5 +133,10 @@ class Config
     public function paddingChar(): string
     {
         return $this->options['paddingChar'] ?? ' ';
+    }
+
+    public function wrapColumns(): string
+    {
+        return $this->options['wrapColumns'] ?? true;
     }
 }

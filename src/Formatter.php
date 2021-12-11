@@ -106,6 +106,7 @@ class Formatter
      * @return array $linesOfRow = 2-dim array of columns and lines per column. usually columns do not have same
      * amount of lines
      *
+     * @throws Exception
      */
     private function breakLinesIfNecessary(array $row): array
     {
@@ -117,20 +118,31 @@ class Formatter
             } else if ($row[$c] === Config::DOUBLE_LINE_SEPARATOR) {
                 $separator = str_repeat(self::DOUBLE_LINE, $this->config->getColumnWidths($c));
                 $linesOfRow[] = [$separator];
-            } else if (is_array($row[$c])) {
-                if (count($row[$c]) !== 2) {
-                    continue;
+            } else if ($this->config->getAlignments($c) === Config::LEFT_AND_RIGHT_ALIGN) {
+                if (!is_array($row[$c]) || count($row[$c]) !== 2) {
+                    throw new Exception("expect an array of size 2 as content of column $c when using left-and-right-alignment");
                 }
+
                 // column consists of left and right part used for left-right alignment
                 // if too long, treat it as normal line
                 if (!TextUtilities::exceedsColumnWidth($row[$c][0], $row[$c][1], $this->config->getColumnWidths($c))) {
                     $linesOfRow[] = [$row[$c]];
                 } else {
-                    $row[$c] = $row[$c][0] . " " . $row[$c][1];
-                    $linesOfRow[] = TextUtilities::breakText(trim($row[$c]), $this->config->getColumnWidths($c));
+                    if ($this->config->wrapColumns()) {
+                        $row[$c] = $row[$c][0] . " " . $row[$c][1];
+                        $linesOfRow[] = TextUtilities::breakText(trim($row[$c]), $this->config->getColumnWidths($c));
+                    } else {
+                        $left = TextUtilities::shortenRight($row[$c][0], floor($this->config->getColumnWidths($c) * 0.66) - 1);
+                        $right = TextUtilities::shortenLeft($row[$c][1], floor($this->config->getColumnWidths($c) * 0.33));
+                        $linesOfRow[] = [[$left, $right]];
+                    }
                 }
             } else {
-                $linesOfRow[] = TextUtilities::breakText(trim($row[$c]), $this->config->getColumnWidths($c));
+                if ($this->config->wrapColumns()) {
+                    $linesOfRow[] = TextUtilities::breakText(trim($row[$c]), $this->config->getColumnWidths($c));
+                } else {
+                    $linesOfRow[] = [TextUtilities::shortenRight(trim($row[$c]), $this->config->getColumnWidths($c))];
+                }
             }
         }
 

@@ -2,6 +2,7 @@
 namespace DIQA\Formatter;
 
 use PHPUnit\Framework\TestCase;
+use SebastianBergmann\CodeCoverage\Report\Text;
 
 final class TextUtilitiesTest extends TestCase
 {
@@ -22,4 +23,13 @@ final class TextUtilitiesTest extends TestCase
         $this->assertEquals("opqrstuvwxyz", $lines[2]);
     }
 
+    public function testShortenRight(): void {
+        $text = TextUtilities::shortenRight("abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyz", 20);
+        $this->assertEquals("abcdefghijklmnopq...", $text);
+    }
+
+    public function testShortenLeft(): void {
+        $text = TextUtilities::shortenLeft("abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyz", 20);
+        $this->assertEquals("...jklmnopqrstuvwxyz", $text);
+    }
 }

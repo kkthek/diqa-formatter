@@ -117,5 +117,87 @@ EOT;
         );
     }
 
+    public function testLeftAndRightTooLongNotBreakableAlignment2(): void
+    {
+        $config = new Config(
+            [20],
+            [Config::LEFT_AND_RIGHT_ALIGN],
+            ['borderPadding' => false, 'border' => false]
+        );
+
+        $formatter = new Formatter($config);
+
+        $formattedOutput = $formatter->formatLine(
+            ["AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA", "BBBB"]
+
+        );
+
+        print "\n$formattedOutput";
+
+        $expectedOutput = <<<EOT
+AAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAA BBBB 
+EOT;
+        $this->assertEquals(
+            self::normalize($expectedOutput),
+            self::normalize($formattedOutput)
+        );
+    }
+
+
+    public function testLeftAndRightNoColumnWrapAlignment(): void
+    {
+        $config = new Config(
+            [20],
+            [Config::LEFT_AND_RIGHT_ALIGN],
+            ['borderPadding' => false, 'border' => false, 'wrapColumns' => false]
+        );
+
+        $formatter = new Formatter($config);
+
+        $formattedOutput = $formatter->formatLine(
+            ["Test", "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"]
+
+        );
+
+        print "\n$formattedOutput";
+
+        $expectedOutput = <<<EOT
+Test          ...AAA
+EOT;
+        $this->assertEquals(
+            self::normalize($expectedOutput),
+            self::normalize($formattedOutput)
+        );
+    }
+
+    public function testLeftAndRightNoColumnWrapAlignment2(): void
+    {
+        $config = new Config(
+            [20],
+            [Config::LEFT_AND_RIGHT_ALIGN],
+            ['borderPadding' => false, 'border' => false, 'wrapColumns' => false]
+        );
+
+        $formatter = new Formatter($config);
+
+        $formattedOutput = $formatter->formatLine(
+            ["AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA", "BBBBB"]
+
+        );
+
+        print "\n$formattedOutput";
+
+        $expectedOutput = <<<EOT
+AAAAAAAAA...   BBBBB
+EOT;
+        $this->assertEquals(
+            self::normalize($expectedOutput),
+            self::normalize($formattedOutput)
+        );
+    }
+
 
 }

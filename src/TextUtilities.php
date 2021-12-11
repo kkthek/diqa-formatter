@@ -1,7 +1,9 @@
 <?php
+
 namespace DIQA\Formatter;
 
-class TextUtilities {
+class TextUtilities
+{
 
     /**
      * Breaks text in multiple lines of $maxLength. Tries to preserve words.
@@ -18,11 +20,11 @@ class TextUtilities {
         $line = '';
         $token = reset($tokens);
         do {
-            if (mb_strlen($line.$token) >= $maxLength) {
+            if (mb_strlen($line . $token) >= $maxLength) {
                 if ($line != '') $rows[] = $line;
                 $line = $token;
             } else {
-                $line .= $line == '' ? $token : ' '.$token;
+                $line .= $line == '' ? $token : ' ' . $token;
             }
         } while (($token = next($tokens)) !== false);
         if ($line != '') {
@@ -30,6 +32,30 @@ class TextUtilities {
         }
 
         return $rows;
+    }
+
+    public static function shortenRight($text, $length): string
+    {
+        if (mb_strlen($text) > $length) {
+            if ($length <= 3) {
+                return substr($text, 0, $length);
+            }
+            return substr($text, 0, $length - 3) . "...";
+        } else {
+            return $text;
+        }
+    }
+
+    public static function shortenLeft($text, $length): string
+    {
+        if (mb_strlen($text) > $length) {
+            if ($length <= 3) {
+                return substr($text, -$length, $length);
+            }
+            return "..." . substr($text, mb_strlen($text) - ($length-3), ($length-3));
+        } else {
+            return $text;
+        }
     }
 
     public static function leftPad($text, $length, $paddingChar = ' '): string
@@ -45,8 +71,8 @@ class TextUtilities {
     public static function centerPad($text, $length, $paddingChar = ' '): string
     {
         $padSize = $length - mb_strlen($text);
-        $leftSize = $padSize % 2 === 0 ? $padSize / 2 : ($padSize-1) / 2;
-        $rightSize = $padSize % 2 === 0 ? $padSize / 2 : ($padSize+1) / 2;
+        $leftSize = $padSize % 2 === 0 ? $padSize / 2 : ($padSize - 1) / 2;
+        $rightSize = $padSize % 2 === 0 ? $padSize / 2 : ($padSize + 1) / 2;
         return str_repeat($paddingChar, $leftSize) . $text . str_repeat(' ', $rightSize);
     }
 
