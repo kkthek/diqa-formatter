@@ -79,9 +79,9 @@ class Config
      * Returns width of a column.
      *
      * @param int $index of column
-     * @return mixed
+     * @return int
      */
-    public function getColumnWidths(int $index)
+    public function getColumnWidth(int $index): int
     {
         return $this->columnWidths[$index];
     }
