@@ -10,6 +10,7 @@ class Formatter
     private const DOUBLE_LINE = "\u{2550}";
     private const PIPE = "\u{2502}";
     private const NC = "\033[0m"; # No Color
+    private const GOLDEN_RATIO = 0.618;
 
     private $config;
 
@@ -149,10 +150,25 @@ class Formatter
         // if too long, treat it as normal line
         if (TextUtilities::exceedsColumnWidth($leftPart, $rightPart, $columnWidth)) {
             if ($this->config->wrapColumns()) {
-                $linesOfRow[] = TextUtilities::breakText(trim("$leftPart $rightPart"), $columnWidth);
+                $wrappedLines = TextUtilities::breakText(trim("$leftPart"), $columnWidth);
+                $lines = [];
+                for($i = 0; $i < count($wrappedLines) - 1; $i++) {
+                    $lines[] = [$wrappedLines[$i], ''];
+                }
+                $lastLine = $wrappedLines[count($wrappedLines) - 1];
+                if ($columnWidth >= mb_strlen("$lastLine $rightPart")) {
+                    $lines[] = [ $lastLine, $rightPart ];
+                } else {
+                    $lines[] = [ $lastLine, '' ];
+                    $wrappedLines = TextUtilities::breakText(trim("$rightPart"), $columnWidth);
+                    foreach($wrappedLines as $line) {
+                        $lines[] = ['', $line];
+                    }
+                }
+                $linesOfRow[] = $lines;
             } else {
-                $left = TextUtilities::shortenRight($leftPart, floor($columnWidth * 0.66) - 1);
-                $right = TextUtilities::shortenLeft($rightPart, floor($columnWidth * 0.33));
+                $left = TextUtilities::shortenRight($leftPart, floor($columnWidth * self::GOLDEN_RATIO) - 1);
+                $right = TextUtilities::shortenLeft($rightPart, floor($columnWidth * (1 - self::GOLDEN_RATIO)));
                 $linesOfRow[] = [[$left, $right]];
             }
         } else {

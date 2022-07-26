@@ -70,7 +70,7 @@ EOT;
         $formatter = new Formatter($config);
 
         $formattedOutput = $formatter->formatLine(
-            ["left and a super long line", "right and a super long line"]
+            ["left and a super long line", "right"]
 
         );
 
@@ -78,8 +78,7 @@ EOT;
 
         $expectedOutput = <<<EOT
 left and a super    
-long line right and 
-a super long line   
+long line      right
 EOT;
         $this->assertEquals(
             self::normalize($expectedOutput),
@@ -109,7 +108,7 @@ Test
 AAAAAAAAAAAAAAAAAAAA
 AAAAAAAAAAAAAAAAAAAA
 AAAAAAAAAAAAAAAAAAAA
-AAAAAAAAAAAAAA      
+      AAAAAAAAAAAAAA
 EOT;
         $this->assertEquals(
             self::normalize($expectedOutput),
@@ -138,7 +137,7 @@ EOT;
 AAAAAAAAAAAAAAAAAAAA
 AAAAAAAAAAAAAAAAAAAA
 AAAAAAAAAAAAAAAAAAAA
-AAAAAAAAAAAAAA BBBB 
+AAAAAAAAAAAAAA  BBBB
 EOT;
         $this->assertEquals(
             self::normalize($expectedOutput),
@@ -165,7 +164,7 @@ EOT;
         print "\n$formattedOutput";
 
         $expectedOutput = <<<EOT
-Test          ...AAA
+Test         ...AAAA
 EOT;
         $this->assertEquals(
             self::normalize($expectedOutput),
@@ -191,7 +190,7 @@ EOT;
         print "\n$formattedOutput";
 
         $expectedOutput = <<<EOT
-AAAAAAAAA...   BBBBB
+AAAAAAAA...    BBBBB
 EOT;
         $this->assertEquals(
             self::normalize($expectedOutput),
