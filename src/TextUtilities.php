@@ -10,17 +10,19 @@ class TextUtilities
      *
      * @param string $line Text
      * @param int $maxLength maximum length of line
+     * @param array $sequencesToIgnore Character sequences to ignore
      * @return array
      */
-    public static function breakText(string $line, int $maxLength): array
+    public static function breakText(string $line, int $maxLength, array $sequencesToIgnore = []): array
     {
+
         $rows = [];
         $tokens = self::splitTokens($line, $maxLength);
 
         $line = '';
         $token = reset($tokens);
         do {
-            if (mb_strlen($line . $token) >= $maxLength) {
+            if (mb_strlen(str_replace($sequencesToIgnore, '', $line . $token)) >= $maxLength) {
                 if ($line != '') $rows[] = $line;
                 $line = $token;
             } else {
@@ -58,33 +60,28 @@ class TextUtilities
         }
     }
 
-    public static function leftPad($text, $length, $paddingChar = ' '): string
+    public static function leftPad($text, $length, $paddingChar = ' ', $ignore = []): string
     {
-        return str_repeat($paddingChar, $length - mb_strlen($text)) . $text;
+        return str_repeat($paddingChar, $length - mb_strlen(str_replace($ignore, '', $text))) . $text;
     }
 
-    public static function rightPad($text, $length, $paddingChar = ' '): string
+    public static function rightPad($text, $length, $paddingChar = ' ', $ignore = []): string
     {
-        return $text . str_repeat($paddingChar, $length - mb_strlen($text));
+        return $text . str_repeat($paddingChar, $length - mb_strlen(str_replace($ignore, '', $text)));
     }
 
-    public static function centerPad($text, $length, $paddingChar = ' '): string
+    public static function centerPad($text, $length, $paddingChar = ' ', $ignore = []): string
     {
-        $padSize = $length - mb_strlen($text);
+        $padSize = $length - mb_strlen(str_replace($ignore, '', $text));
         $leftSize = $padSize % 2 === 0 ? $padSize / 2 : ($padSize - 1) / 2;
         $rightSize = $padSize % 2 === 0 ? $padSize / 2 : ($padSize + 1) / 2;
         return str_repeat($paddingChar, $leftSize) . $text . str_repeat(' ', $rightSize);
     }
 
-    public static function leftAndRightPad($leftText, $rightText, $columnWidth, $paddingChar = ' '): string
+    public static function leftAndRightPad($leftText, $rightText, $columnWidth, $paddingChar = ' ', $ignore = []): string
     {
-        $repeatTimes = $columnWidth - mb_strlen($leftText) - mb_strlen($rightText);
+        $repeatTimes = $columnWidth - mb_strlen(str_replace($ignore, '', $leftText)) - mb_strlen(str_replace($ignore, '', $rightText));
         return $leftText . str_repeat($paddingChar, $repeatTimes) . $rightText;
-    }
-
-    public static function exceedsColumnWidth($leftText, $rightText, $columnWidth): bool
-    {
-        return mb_strlen($leftText) + mb_strlen($rightText) > $columnWidth;
     }
 
     /**

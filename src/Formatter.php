@@ -79,27 +79,27 @@ class Formatter
             default:
                 $this->checkColumnInput($columnValue);
             $columnLine = TextUtilities::rightPad($columnValue, $columnWidth,
-                    $this->config->paddingChar());
+                    $this->config->paddingChar(), $this->config->getSequencesToIgnore());
                 break;
             case Config::RIGHT_ALIGN:
                 $this->checkColumnInput($columnValue);
                 $columnLine = TextUtilities::leftPad($columnValue, $columnWidth,
-                    $this->config->paddingChar());
+                    $this->config->paddingChar(), $this->config->getSequencesToIgnore());
                 break;
             case Config::CENTER_ALIGN:
                 $this->checkColumnInput($columnValue);
                 $columnLine = TextUtilities::centerPad($columnValue, $columnWidth,
-                    $this->config->paddingChar());
+                    $this->config->paddingChar(), $this->config->getSequencesToIgnore());
                 break;
             case Config::LEFT_AND_RIGHT_ALIGN:
                 // if line consists of left and right part do left and right alignment
                 // otherwise just do left alignment
                 if (is_array($columnValue)) {
                     $columnLine = TextUtilities::leftAndRightPad($columnValue[0], $columnValue[1],
-                        $columnWidth, $this->config->paddingChar());
+                        $columnWidth, $this->config->paddingChar(), $this->config->getSequencesToIgnore());
                 } else {
                     $columnLine = TextUtilities::rightPad($columnValue, $columnWidth,
-                        $this->config->paddingChar());
+                        $this->config->paddingChar(), $this->config->getSequencesToIgnore());
                 }
                 break;
         }
@@ -148,9 +148,9 @@ class Formatter
         $rightPart = $column[1];
         // column consists of left and right part used for left-right alignment
         // if too long, treat it as normal line
-        if (TextUtilities::exceedsColumnWidth($leftPart, $rightPart, $columnWidth)) {
+        if ($columnWidth < mb_strlen("$leftPart $rightPart")) {
             if ($this->config->wrapColumns()) {
-                $wrappedLines = TextUtilities::breakText(trim("$leftPart"), $columnWidth);
+                $wrappedLines = TextUtilities::breakText(trim("$leftPart"), $columnWidth, $this->config->getSequencesToIgnore());
                 $lines = [];
                 for($i = 0; $i < count($wrappedLines) - 1; $i++) {
                     $lines[] = [$wrappedLines[$i], ''];
@@ -160,7 +160,7 @@ class Formatter
                     $lines[] = [ $lastLine, $rightPart ];
                 } else {
                     $lines[] = [ $lastLine, '' ];
-                    $wrappedLines = TextUtilities::breakText(trim("$rightPart"), $columnWidth);
+                    $wrappedLines = TextUtilities::breakText(trim("$rightPart"), $columnWidth, $this->config->getSequencesToIgnore());
                     foreach($wrappedLines as $line) {
                         $lines[] = ['', $line];
                     }
@@ -189,7 +189,7 @@ class Formatter
     private function wrapOtherAlignments($column, int $columnWidth, array $linesOfRow): array
     {
         if ($this->config->wrapColumns()) {
-            $linesOfRow[] = TextUtilities::breakText(trim($column), $columnWidth);
+            $linesOfRow[] = TextUtilities::breakText(trim($column), $columnWidth, $this->config->getSequencesToIgnore());
         } else {
             $linesOfRow[] = [TextUtilities::shortenRight(trim($column), $columnWidth)];
         }

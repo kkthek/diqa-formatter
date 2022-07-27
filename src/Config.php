@@ -21,6 +21,7 @@ class Config
     private $options;
 
     private $highlights;
+    private $sequencesToIgnore;
 
     /**
      * Formatting configuration.
@@ -52,6 +53,7 @@ class Config
                 $this->columnWidths[$i]--;
             }
         }
+        $this->sequencesToIgnore = [];
     }
 
     /**
@@ -74,6 +76,27 @@ class Config
     {
         return $this->highlights;
     }
+
+    /**
+     * Defines character sequences which are ignored by layout.
+     *
+     * @param $sequencesToIgnore
+     */
+    public function setSequencesToIgnore($sequencesToIgnore): void
+    {
+        $this->sequencesToIgnore = $sequencesToIgnore;
+    }
+
+    /**
+     * Returns character sequences which are ignored by layout.
+     *
+     * @return array
+     */
+    public function getSequencesToIgnore(): array
+    {
+        return $this->sequencesToIgnore;
+    }
+
 
     /**
      * Returns width of a column.
@@ -139,4 +162,5 @@ class Config
     {
         return $this->options['wrapColumns'] ?? true;
     }
+
 }
