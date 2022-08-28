@@ -9,6 +9,8 @@ Features:
 - Border support
 - Padding
 - Color highlighting (for console)
+- Word wrapping or shortening
+- Char sequences can be ignored by layout mechanism 
 
 ## Quick start
 
@@ -60,20 +62,28 @@ The config class has the following constructor parameters:
 
 - array of options. The following are currently available:
   - **borderPadding**: Adds 1-char-padding at the borders (left and right) 
-  - **border**: Adds a border [2]
+  - **border**: Adds a border [2]. 
   - **paddingChar**: Changes the padding character. default is a whitespace.
+  - **wrapColumns**: Specifies if lines should be wrapped or shortened. Default is wrapped.
 
 Additionally, the following methods are available:
 - `highlightWord ($word, $color, $column = NULL)`
-  - Highlights a word with a color. The last parameter is optional. If missing, the word is highlighted in all columns.
+  - Highlights a word with a color. The last parameter is optional. If missing, the word is highlighted in all columns. See example A.
+- `setSequencesToIgnore (array $sequences)`
+  - Specifies character sequences which should be completely ignored by layouting mechanism. This is useful when you want to output formatting data for a printer for example. See example B.
 
-
-Example:
+Example A:
 ```
 $warningColor = Color::fromColor(Color::LIGHT_GREY, Color::RED);
 $config->highlightWord("[ERROR]", $warningColor, 3);
 ```
 Highlights the string "[ERROR]" in 3rd column with red background and lightgrey text color.
+
+Example B:
+```
+$config->setSequencesToIgnore(["//BOLD", "//ITALIC", "//OFF"]);
+```
+These strings are completely ignored by the layout, for example "//BOLDHaus//OFF" is regarded as if it would be "Haus" only 
 
 # Alignments
 While left, center and right alignments are quite self-explanatory, left-right alignment might not be.

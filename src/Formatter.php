@@ -148,7 +148,8 @@ class Formatter
         $rightPart = $column[1];
         // column consists of left and right part used for left-right alignment
         // if too long, treat it as normal line
-        if ($columnWidth < mb_strlen("$leftPart $rightPart")) {
+        $bothColumnsWithoutIgnored = str_replace($this->config->getSequencesToIgnore(), '', "$leftPart $rightPart");
+        if ($columnWidth < mb_strlen($bothColumnsWithoutIgnored)) {
             if ($this->config->wrapColumns()) {
                 $wrappedLines = TextUtilities::breakText(trim("$leftPart"), $columnWidth, $this->config->getSequencesToIgnore());
                 $lines = [];
@@ -167,8 +168,8 @@ class Formatter
                 }
                 $linesOfRow[] = $lines;
             } else {
-                $left = TextUtilities::shortenRight($leftPart, floor($columnWidth * self::GOLDEN_RATIO) - 1);
-                $right = TextUtilities::shortenLeft($rightPart, floor($columnWidth * (1 - self::GOLDEN_RATIO)));
+                $left = TextUtilities::shortenRight($leftPart, floor($columnWidth * self::GOLDEN_RATIO) - 1, $this->config->getSequencesToIgnore());
+                $right = TextUtilities::shortenLeft($rightPart, floor($columnWidth * (1 - self::GOLDEN_RATIO)), $this->config->getSequencesToIgnore());
                 $linesOfRow[] = [[$left, $right]];
             }
         } else {
@@ -191,7 +192,7 @@ class Formatter
         if ($this->config->wrapColumns()) {
             $linesOfRow[] = TextUtilities::breakText(trim($column), $columnWidth, $this->config->getSequencesToIgnore());
         } else {
-            $linesOfRow[] = [TextUtilities::shortenRight(trim($column), $columnWidth)];
+            $linesOfRow[] = [TextUtilities::shortenRight(trim($column), $columnWidth, $this->config->getSequencesToIgnore())];
         }
         return $linesOfRow;
     }

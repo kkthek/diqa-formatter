@@ -57,7 +57,7 @@ EOT;
 
         $expectedOutput = <<<EOT
 row 1 column 1              row 1 column 2                                254,00
-row 2 column 1      das ist viel Text für eine...                         254,00
+row 2 column 1      das ist viel Text für eine ...                        254,00
 row 3 column 1              row 3 column 2                                424,21
 EOT;
         $this->assertEquals(

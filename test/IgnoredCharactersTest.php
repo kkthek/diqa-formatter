@@ -37,4 +37,58 @@ EOT;
         );
     }
 
+    public function testIgnoreFormattingCommandsWithShortening(): void
+    {
+        $config = new Config(
+            [30],
+            [Config::LEFT_ALIGN],
+            ['borderPadding' => false, 'border' => false, 'wrapColumns' => false]
+        );
+        $config->setSequencesToIgnore([ "//BOLD", "//ITALIC", "//OFF" ]);
+
+        $formatter = new Formatter($config);
+
+        $formattedOutput = $formatter->format([
+            ["//BOLDabcdefghijklmnopqrstuvwxyz0123456789//OFF"],
+
+        ]);
+
+        print "\n$formattedOutput";
+
+        $expectedOutput = <<<EOT
+//BOLDabcdefghijklmnopqrstuvwxyz0//OFF...
+EOT;
+        $this->assertEquals(
+            self::normalize($expectedOutput),
+            self::normalize($formattedOutput)
+        );
+    }
+
+    public function testIgnoreFormattingCommandsWithoutShortening(): void
+    {
+        $config = new Config(
+            [30],
+            [Config::LEFT_ALIGN],
+            ['borderPadding' => false, 'border' => false, 'wrapColumns' => false]
+        );
+        $config->setSequencesToIgnore([ "//BOLD", "//ITALIC", "//OFF" ]);
+
+        $formatter = new Formatter($config);
+
+        $formattedOutput = $formatter->format([
+            ["//BOLDabcdefghijklmnopqrstuvwxyz//OFF"],
+
+        ]);
+
+        print "\n$formattedOutput";
+
+        $expectedOutput = <<<EOT
+//BOLDabcdefghijklmnopqrstuvwxyz//OFF    
+EOT;
+        $this->assertEquals(
+            self::normalize($expectedOutput),
+            self::normalize($formattedOutput)
+        );
+    }
+
 }

@@ -36,29 +36,51 @@ class TextUtilities
         return $rows;
     }
 
-    public static function shortenRight($text, $length): string
+    public static function shortenRight($text, $length, $ignore = []): string
     {
-        if (mb_strlen($text) > $length) {
-            if ($length <= 3) {
-                return substr($text, 0, $length);
-            }
-            return substr($text, 0, $length - 3) . "...";
-        } else {
+        if (mb_strlen(str_replace($ignore, '', $text)) <= $length) {
             return $text;
         }
+        if (count($ignore) === 0 && $length > 3) {
+            return mb_substr($text, 0, $length - 3) . "...";
+        }
+        $reg_Escaped = array_map(function($e) { return preg_quote($e, "/"); }, $ignore);
+        $pattern = "/" . implode("|", $reg_Escaped) . "/";
+        if ($length <= 3) {
+            $text = preg_replace($pattern, "", $text);
+            return mb_substr($text, 0, $length);
+        }
+
+        preg_match_all($pattern, $text, $matches);
+        $count = 0;
+        $result = '';
+        $textWithoutIgnored = preg_replace($pattern, "\u{0000}", $text);
+        for($i = 0; $i < mb_strlen($textWithoutIgnored); $i++) {
+            if ($count < $length-3 || $textWithoutIgnored[$i] === "\u{0000}") {
+                $result .= $textWithoutIgnored[$i];
+            }
+            if ($textWithoutIgnored[$i] != "\u{0000}") $count++;
+        }
+        foreach($matches[0] as $m) {
+            $result = self::replaceFirst($result, "\u{0000}", $m);
+        }
+        return "$result...";
     }
 
-    public static function shortenLeft($text, $length): string
+    public static function shortenLeft($text, $length, $ignore = []): string
     {
-        if (mb_strlen($text) > $length) {
-            if ($length <= 3) {
-                return substr($text, -$length, $length);
-            }
-            return "..." . substr($text, mb_strlen($text) - ($length-3), ($length-3));
-        } else {
-            return $text;
-        }
+        $ignoreReversed = array_map(function($e) { return strrev($e); }, $ignore);
+        return strrev(self::shortenRight(strrev($text), $length, $ignoreReversed));
     }
+
+    private static function replaceFirst($haystack, $needle, $replace) {
+        $pos = strpos($haystack, $needle);
+        if ($pos !== false) {
+            return substr_replace($haystack, $replace, $pos, strlen($needle));
+        }
+        return $haystack;
+    }
+
 
     public static function leftPad($text, $length, $paddingChar = ' ', $ignore = []): string
     {
