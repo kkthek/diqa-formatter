@@ -5,24 +5,32 @@ namespace DIQA\Formatter;
 class TextUtilities
 {
 
+    private $config;
+    private $ignoreReversed;
+
+    public function __construct(Config $config)
+    {
+        $this->config = $config;
+        $this->ignoreReversed = array_map(function ($e) { return strrev($e); }, $this->config->getSequencesToIgnore());
+    }
+
     /**
      * Breaks text in multiple lines of $maxLength. Tries to preserve words.
      *
      * @param string $line Text
      * @param int $maxLength maximum length of line
-     * @param array $sequencesToIgnore Character sequences to ignore
      * @return array
      */
-    public static function breakText(string $line, int $maxLength, array $sequencesToIgnore = []): array
+    public function breakText(string $line, int $maxLength): array
     {
 
         $rows = [];
-        $tokens = self::splitTokens($line, $maxLength);
+        $tokens = $this->splitTokens($line, $maxLength);
 
         $line = '';
         $token = reset($tokens);
         do {
-            if (mb_strlen(str_replace($sequencesToIgnore, '', $line . $token)) >= $maxLength) {
+            if (mb_strlen(str_replace($this->config->getSequencesToIgnore(), '', $line . $token)) >= $maxLength) {
                 if ($line != '') $rows[] = $line;
                 $line = $token;
             } else {
@@ -36,16 +44,24 @@ class TextUtilities
         return $rows;
     }
 
-    public static function shortenRight($text, $length, $ignore = []): string
+    /**
+     * Shortens the right side of given text to the given length.
+     *
+     * @param $text
+     * @param $length
+     * @return string
+     */
+    public function shortenRight($text, $length): string
     {
-        if (mb_strlen(str_replace($ignore, '', $text)) <= $length) {
+        if (mb_strlen(str_replace($this->config->getSequencesToIgnore(), '', $text)) <= $length) {
             return $text;
         }
-        if (count($ignore) === 0 && $length > 3) {
+        if (count($this->config->getSequencesToIgnore()) === 0 && $length > 3) {
             return mb_substr($text, 0, $length - 3) . "...";
         }
-        $reg_Escaped = array_map(function($e) { return preg_quote($e, "/"); }, $ignore);
-        $pattern = "/" . implode("|", $reg_Escaped) . "/";
+        $ignorePatternsEscaped = array_map(function ($e) { return preg_quote($e, "/"); },
+            $this->config->getSequencesToIgnore());
+        $pattern = "/" . implode("|", $ignorePatternsEscaped) . "/";
         if ($length <= 3) {
             $text = preg_replace($pattern, "", $text);
             return mb_substr($text, 0, $length);
@@ -55,25 +71,40 @@ class TextUtilities
         $count = 0;
         $result = '';
         $textWithoutIgnored = preg_replace($pattern, "\u{0000}", $text);
-        for($i = 0; $i < mb_strlen($textWithoutIgnored); $i++) {
-            if ($count < $length-3 || $textWithoutIgnored[$i] === "\u{0000}") {
+        for ($i = 0; $i < mb_strlen($textWithoutIgnored); $i++) {
+            if ($count < $length - 3 || $textWithoutIgnored[$i] === "\u{0000}") {
                 $result .= $textWithoutIgnored[$i];
             }
             if ($textWithoutIgnored[$i] != "\u{0000}") $count++;
         }
-        foreach($matches[0] as $m) {
-            $result = self::replaceFirst($result, "\u{0000}", $m);
+        foreach ($matches[0] as $m) {
+            $result = $this->replaceFirst($result, "\u{0000}", $m);
         }
         return "$result...";
     }
 
-    public static function shortenLeft($text, $length, $ignore = []): string
+    /**
+     * Shortens the left side of given text to the given length.
+     *
+     * @param $text
+     * @param $length
+     * @return string
+     */
+    public function shortenLeft($text, $length): string
     {
-        $ignoreReversed = array_map(function($e) { return strrev($e); }, $ignore);
-        return strrev(self::shortenRight(strrev($text), $length, $ignoreReversed));
+        return strrev($this->shortenRight(strrev($text), $length, $this->ignoreReversed));
     }
 
-    private static function replaceFirst($haystack, $needle, $replace) {
+    /**
+     * Replaces the _first_ occurence of $needle with $replace in the $haystack.
+     *
+     * @param $haystack
+     * @param $needle
+     * @param $replace
+     * @return array|mixed|string|string[]
+     */
+    private function replaceFirst($haystack, $needle, $replace)
+    {
         $pos = strpos($haystack, $needle);
         if ($pos !== false) {
             return substr_replace($haystack, $replace, $pos, strlen($needle));
@@ -81,29 +112,64 @@ class TextUtilities
         return $haystack;
     }
 
-
-    public static function leftPad($text, $length, $paddingChar = ' ', $ignore = []): string
+    /**
+     * Pad text from left side to $length chars.
+     *
+     * @param $text
+     * @param $length
+     * @param string $paddingChar
+     * @return string
+     */
+    public function leftPad($text, $length): string
     {
-        return str_repeat($paddingChar, $length - mb_strlen(str_replace($ignore, '', $text))) . $text;
+        return str_repeat($this->config->paddingChar(), $length -
+                mb_strlen(str_replace($this->config->getSequencesToIgnore(), '', $text))) . $text;
     }
 
-    public static function rightPad($text, $length, $paddingChar = ' ', $ignore = []): string
+    /**
+     * Pad text to right side to $length chars.
+     *
+     * @param $text
+     * @param $length
+     * @param string $paddingChar
+     * @return string
+     */
+    public function rightPad($text, $length): string
     {
-        return $text . str_repeat($paddingChar, $length - mb_strlen(str_replace($ignore, '', $text)));
+        return $text . str_repeat($this->config->paddingChar(), $length -
+                mb_strlen(str_replace($this->config->getSequencesToIgnore(), '', $text)));
     }
 
-    public static function centerPad($text, $length, $paddingChar = ' ', $ignore = []): string
+    /**
+     * Pads text from both sides to $length chars.
+     *
+     * @param $text
+     * @param $length
+     * @param string $paddingChar
+     * @return string
+     */
+    public function centerPad($text, $length): string
     {
-        $padSize = $length - mb_strlen(str_replace($ignore, '', $text));
+        $padSize = $length - mb_strlen(str_replace($this->config->getSequencesToIgnore(), '', $text));
         $leftSize = $padSize % 2 === 0 ? $padSize / 2 : ($padSize - 1) / 2;
         $rightSize = $padSize % 2 === 0 ? $padSize / 2 : ($padSize + 1) / 2;
-        return str_repeat($paddingChar, $leftSize) . $text . str_repeat(' ', $rightSize);
+        return str_repeat($this->config->paddingChar(), $leftSize) . $text . str_repeat(' ', $rightSize);
     }
 
-    public static function leftAndRightPad($leftText, $rightText, $columnWidth, $paddingChar = ' ', $ignore = []): string
+    /**
+     * Pads text in the middle to $length chars.
+     *
+     * @param $leftText
+     * @param $rightText
+     * @param $columnWidth
+     * @param string $paddingChar
+     * @return string
+     */
+    public function leftAndRightPad($leftText, $rightText, $columnWidth): string
     {
-        $repeatTimes = $columnWidth - mb_strlen(str_replace($ignore, '', $leftText)) - mb_strlen(str_replace($ignore, '', $rightText));
-        return $leftText . str_repeat($paddingChar, $repeatTimes) . $rightText;
+        $repeatTimes = $columnWidth - mb_strlen(str_replace($this->config->getSequencesToIgnore(), '', $leftText))
+            - mb_strlen(str_replace($this->config->getSequencesToIgnore(), '', $rightText));
+        return $leftText . str_repeat($this->config->paddingChar(), $repeatTimes) . $rightText;
     }
 
     /**
@@ -113,7 +179,7 @@ class TextUtilities
      * @param int $maxLength maximum length of line
      * @return array
      */
-    private static function splitTokens(string $line, int $maxLength): array
+    private function splitTokens(string $line, int $maxLength): array
     {
         $tokens = explode(" ", $line);
         $newTokens = [];

@@ -13,6 +13,7 @@ class Formatter
     private const GOLDEN_RATIO = 0.618;
 
     private $config;
+    private $textUtilities;
 
     /**
      * Creates a formatter object with the given configuration.
@@ -22,6 +23,7 @@ class Formatter
     public function __construct(Config $config)
     {
         $this->config = $config;
+        $this->textUtilities = new TextUtilities($config);
     }
 
     /**
@@ -78,28 +80,23 @@ class Formatter
             case Config::LEFT_ALIGN:
             default:
                 $this->checkColumnInput($columnValue);
-            $columnLine = TextUtilities::rightPad($columnValue, $columnWidth,
-                    $this->config->paddingChar(), $this->config->getSequencesToIgnore());
+            $columnLine = $this->textUtilities->rightPad($columnValue, $columnWidth);
                 break;
             case Config::RIGHT_ALIGN:
                 $this->checkColumnInput($columnValue);
-                $columnLine = TextUtilities::leftPad($columnValue, $columnWidth,
-                    $this->config->paddingChar(), $this->config->getSequencesToIgnore());
+                $columnLine = $this->textUtilities->leftPad($columnValue, $columnWidth);
                 break;
             case Config::CENTER_ALIGN:
                 $this->checkColumnInput($columnValue);
-                $columnLine = TextUtilities::centerPad($columnValue, $columnWidth,
-                    $this->config->paddingChar(), $this->config->getSequencesToIgnore());
+                $columnLine = $this->textUtilities->centerPad($columnValue, $columnWidth);
                 break;
             case Config::LEFT_AND_RIGHT_ALIGN:
                 // if line consists of left and right part do left and right alignment
                 // otherwise just do left alignment
                 if (is_array($columnValue)) {
-                    $columnLine = TextUtilities::leftAndRightPad($columnValue[0], $columnValue[1],
-                        $columnWidth, $this->config->paddingChar(), $this->config->getSequencesToIgnore());
+                    $columnLine = $this->textUtilities->leftAndRightPad($columnValue[0], $columnValue[1], $columnWidth);
                 } else {
-                    $columnLine = TextUtilities::rightPad($columnValue, $columnWidth,
-                        $this->config->paddingChar(), $this->config->getSequencesToIgnore());
+                    $columnLine = $this->textUtilities->rightPad($columnValue, $columnWidth);
                 }
                 break;
         }
@@ -151,7 +148,7 @@ class Formatter
         $bothColumnsWithoutIgnored = str_replace($this->config->getSequencesToIgnore(), '', "$leftPart $rightPart");
         if ($columnWidth < mb_strlen($bothColumnsWithoutIgnored)) {
             if ($this->config->wrapColumns()) {
-                $wrappedLines = TextUtilities::breakText(trim("$leftPart"), $columnWidth, $this->config->getSequencesToIgnore());
+                $wrappedLines = $this->textUtilities->breakText(trim("$leftPart"), $columnWidth);
                 $lines = [];
                 for($i = 0; $i < count($wrappedLines) - 1; $i++) {
                     $lines[] = [$wrappedLines[$i], ''];
@@ -161,15 +158,15 @@ class Formatter
                     $lines[] = [ $lastLine, $rightPart ];
                 } else {
                     $lines[] = [ $lastLine, '' ];
-                    $wrappedLines = TextUtilities::breakText(trim("$rightPart"), $columnWidth, $this->config->getSequencesToIgnore());
+                    $wrappedLines = $this->textUtilities->breakText(trim("$rightPart"), $columnWidth);
                     foreach($wrappedLines as $line) {
                         $lines[] = ['', $line];
                     }
                 }
                 $linesOfRow[] = $lines;
             } else {
-                $left = TextUtilities::shortenRight($leftPart, floor($columnWidth * self::GOLDEN_RATIO) - 1, $this->config->getSequencesToIgnore());
-                $right = TextUtilities::shortenLeft($rightPart, floor($columnWidth * (1 - self::GOLDEN_RATIO)), $this->config->getSequencesToIgnore());
+                $left = $this->textUtilities->shortenRight($leftPart, floor($columnWidth * self::GOLDEN_RATIO) - 1);
+                $right = $this->textUtilities->shortenLeft($rightPart, floor($columnWidth * (1 - self::GOLDEN_RATIO)));
                 $linesOfRow[] = [[$left, $right]];
             }
         } else {
@@ -190,9 +187,9 @@ class Formatter
     private function wrapOtherAlignments($column, int $columnWidth, array $linesOfRow): array
     {
         if ($this->config->wrapColumns()) {
-            $linesOfRow[] = TextUtilities::breakText(trim($column), $columnWidth, $this->config->getSequencesToIgnore());
+            $linesOfRow[] = $this->textUtilities->breakText(trim($column), $columnWidth);
         } else {
-            $linesOfRow[] = [TextUtilities::shortenRight(trim($column), $columnWidth, $this->config->getSequencesToIgnore())];
+            $linesOfRow[] = [$this->textUtilities->shortenRight(trim($column), $columnWidth)];
         }
         return $linesOfRow;
     }

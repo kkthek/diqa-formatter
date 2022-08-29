@@ -5,7 +5,7 @@ The formatting library `diqa/formatter` eases formatted text output in multiple 
 Features:
 - Fixed column sizes
 - Different alignments inside the columns
-- Separators
+- Separators (horizontal lines)
 - Border support
 - Padding
 - Color highlighting (for console)
