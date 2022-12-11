@@ -68,8 +68,8 @@ The config class has the following constructor parameters:
   
 
 - Separator lines: A line can be one of the constants (holds for all columns)
-  - `Config::LINE_SEPARATOR`: Renders a line of dashs (-)
-  - `Config::DOUBLE_LINE_SEPARATOR`: Renders a line of equal signs (=)
+  - `Config::LINE_SEPARATOR`: Renders a single line 
+  - `Config::DOUBLE_LINE_SEPARATOR`: Renders a double line
   - `Config::EMPTY_LINE_SEPARATOR`: Renders an empty line
 
   ```
