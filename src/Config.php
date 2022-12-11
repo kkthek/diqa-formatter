@@ -14,10 +14,10 @@ class Config
 
     public const LINE_SEPARATOR = "__LINE_SEPERATOR__";
     public const DOUBLE_LINE_SEPARATOR = "__DOUBLELINE_SEPERATOR__";
+    public const EMPTY_LINE_SEPARATOR = "__EMPTY_LINE_SEPERATOR__";
 
     private $columnWidths;
     private $alignments;
-    private $totalColumnsWidth;
     private $options;
 
     private $highlights;
@@ -39,7 +39,7 @@ class Config
             throw new Exception("Number of columns and alignments must match");
         }
         $this->options = is_null($options) ? [] : $options;
-        $this->totalColumnsWidth = array_sum($this->columnWidths);
+
         $this->highlights = [];
 
         if ($this->hasBorderPadding()) {
@@ -117,16 +117,6 @@ class Config
     public function getNumberOfColumns(): int
     {
         return count($this->columnWidths);
-    }
-
-    /**
-     * Returns total length of columns.
-     *
-     * @return int
-     */
-    public function getTotalColumnsWidth(): int
-    {
-        return $this->totalColumnsWidth;
     }
 
     /**

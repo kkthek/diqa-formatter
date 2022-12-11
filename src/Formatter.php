@@ -8,6 +8,7 @@ class Formatter
 {
     private const SINGLE_LINE = "\u{2500}";
     private const DOUBLE_LINE = "\u{2550}";
+    private const EMPTY_LINE = " ";
     private const PIPE = "\u{2502}";
     private const NC = "\033[0m"; # No Color
     private const GOLDEN_RATIO = 0.618;
@@ -48,9 +49,9 @@ class Formatter
         for ($j = 0; $j < count($rows); $j++) {
 
             if ($rows[$j] === Config::LINE_SEPARATOR
-                || $rows[$j] === Config::DOUBLE_LINE_SEPARATOR) {
-                $resultLines[] = $this->formatSeparator($rows[$j]);
-                continue;
+                || $rows[$j] === Config::DOUBLE_LINE_SEPARATOR
+                || $rows[$j] === Config::EMPTY_LINE_SEPARATOR) {
+                $rows[$j] = $this->formatSeparator($rows[$j]);
             }
 
             if ($this->config->hasBorder()) {
@@ -80,7 +81,7 @@ class Formatter
             case Config::LEFT_ALIGN:
             default:
                 $this->checkColumnInput($columnValue);
-            $columnLine = $this->textUtilities->rightPad($columnValue, $columnWidth);
+                $columnLine = $this->textUtilities->rightPad($columnValue, $columnWidth);
                 break;
             case Config::RIGHT_ALIGN:
                 $this->checkColumnInput($columnValue);
@@ -116,6 +117,10 @@ class Formatter
     {
         $linesOfRow = [];
         for ($c = 0; $c < count($row); $c++) {
+            if ($row[$c] === Config::EMPTY_LINE_SEPARATOR) {
+                $linesOfRow[] = [str_repeat(self::EMPTY_LINE, $this->config->getColumnWidth($c))];
+                continue;
+            }
             $columnWidth = $this->config->getColumnWidth($c);
             if ($this->config->getAlignments($c) === Config::LEFT_AND_RIGHT_ALIGN) {
                 if (!is_array($row[$c]) || count($row[$c]) !== 2) {
@@ -150,16 +155,16 @@ class Formatter
             if ($this->config->wrapColumns()) {
                 $wrappedLines = $this->textUtilities->breakText(trim("$leftPart"), $columnWidth);
                 $lines = [];
-                for($i = 0; $i < count($wrappedLines) - 1; $i++) {
+                for ($i = 0; $i < count($wrappedLines) - 1; $i++) {
                     $lines[] = [$wrappedLines[$i], ''];
                 }
                 $lastLine = $wrappedLines[count($wrappedLines) - 1];
                 if ($columnWidth >= mb_strlen("$lastLine $rightPart")) {
-                    $lines[] = [ $lastLine, $rightPart ];
+                    $lines[] = [$lastLine, $rightPart];
                 } else {
-                    $lines[] = [ $lastLine, '' ];
+                    $lines[] = [$lastLine, ''];
                     $wrappedLines = $this->textUtilities->breakText(trim("$rightPart"), $columnWidth);
-                    foreach($wrappedLines as $line) {
+                    foreach ($wrappedLines as $line) {
                         $lines[] = ['', $line];
                     }
                 }
@@ -178,7 +183,7 @@ class Formatter
     /**
      * Wrap left-, right- and center-aligned columns
      *
-     * @param $column Column
+     * @param string $column content of column
      * @param int $columnWidth Column width
      * @param array $linesOfRow = 2-dim array of columns and lines per column. usually columns do not have same
      * amount of lines
@@ -198,18 +203,28 @@ class Formatter
      * Add a separator line if necessary.
      *
      * @param mixed $row all columns of a row
-     * @return string
+     * @return array
      */
-    private function formatSeparator($row): string
+    private function formatSeparator($row): array
     {
+        $columns = [];
         if ($row === Config::LINE_SEPARATOR) {
-            return str_repeat(self::SINGLE_LINE, $this->config->getTotalColumnsWidth());
+            for ($i = 0; $i < $this->config->getNumberOfColumns(); $i++) {
+                $columns[] = str_repeat(self::SINGLE_LINE, $this->config->getColumnWidth($i));
+            }
 
         } else if ($row === Config::DOUBLE_LINE_SEPARATOR) {
-            return str_repeat(self::DOUBLE_LINE, $this->config->getTotalColumnsWidth());
+            for ($i = 0; $i < $this->config->getNumberOfColumns(); $i++) {
+                $columns[] = str_repeat(self::DOUBLE_LINE, $this->config->getColumnWidth($i));
+            }
+
+        } else if ($row === Config::EMPTY_LINE_SEPARATOR) {
+            for ($i = 0; $i < $this->config->getNumberOfColumns(); $i++) {
+                $columns[] = Config::EMPTY_LINE_SEPARATOR;
+            }
 
         }
-        return '';
+        return $columns;
     }
 
     /**

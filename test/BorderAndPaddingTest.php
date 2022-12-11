@@ -191,4 +191,69 @@ EOT;
         );
     }
 
+    public function testDoubleLineWithBorder(): void
+    {
+        $config = new Config(
+            [20, 30, 30],
+            [Config::LEFT_ALIGN, Config::LEFT_ALIGN, Config::RIGHT_ALIGN],
+            ['border' => true]
+        );
+
+        $formatter = new Formatter($config);
+
+        $formattedOutput = $formatter->format([
+            ["row 1 column 1", "row 1 column 2", "254,00"],
+            Config::DOUBLE_LINE_SEPARATOR,
+            ["row 3 column 1", "row 3 column 2 ", "424,21"],
+        ]);
+
+        print "\n$formattedOutput";
+
+        $expectedOutput = <<<EOT
+┌──────────────────┬─────────────────────────────┬─────────────────────────────┐
+│row 1 column 1    │row 1 column 2               │                       254,00│
+├──────────────────┼─────────────────────────────┼─────────────────────────────┤
+│══════════════════│═════════════════════════════│═════════════════════════════│
+├──────────────────┼─────────────────────────────┼─────────────────────────────┤
+│row 3 column 1    │row 3 column 2               │                       424,21│
+└──────────────────┴─────────────────────────────┴─────────────────────────────┘
+EOT;
+        $this->assertEquals(
+            self::normalize($expectedOutput),
+            self::normalize($formattedOutput)
+        );
+    }
+
+    public function testEmptyLineWithBorder(): void
+    {
+        $config = new Config(
+            [20, 30, 30],
+            [Config::LEFT_ALIGN, Config::LEFT_ALIGN, Config::RIGHT_ALIGN],
+            ['border' => true]
+        );
+
+        $formatter = new Formatter($config);
+
+        $formattedOutput = $formatter->format([
+            ["row 1 column 1", "row 1 column 2", "254,00"],
+            Config::EMPTY_LINE_SEPARATOR,
+            ["row 3 column 1", "row 3 column 2 ", "424,21"],
+        ]);
+
+        print "\n$formattedOutput";
+
+        $expectedOutput = <<<EOT
+┌──────────────────┬─────────────────────────────┬─────────────────────────────┐
+│row 1 column 1    │row 1 column 2               │                       254,00│
+├──────────────────┼─────────────────────────────┼─────────────────────────────┤
+│                  │                             │                             │
+├──────────────────┼─────────────────────────────┼─────────────────────────────┤
+│row 3 column 1    │row 3 column 2               │                       424,21│
+└──────────────────┴─────────────────────────────┴─────────────────────────────┘
+EOT;
+        $this->assertEquals(
+            self::normalize($expectedOutput),
+            self::normalize($formattedOutput)
+        );
+    }
 }

@@ -65,6 +65,20 @@ The config class has the following constructor parameters:
   - **border**: Adds a border [2]. 
   - **paddingChar**: Changes the padding character. default is a whitespace.
   - **wrapColumns**: Specifies if lines should be wrapped or shortened. Default is wrapped.
+  
+
+- Separator lines: A line can be one of the constants (holds for all columns)
+  - `Config::LINE_SEPARATOR`: Renders a line of dashs (-)
+  - `Config::DOUBLE_LINE_SEPARATOR`: Renders a line of equal signs (=)
+  - `Config::EMPTY_LINE_SEPARATOR`: Renders an empty line
+
+```
+$output = $formatter->format([
+ ["column1", "column2", "column3"],   // row 1
+ [Config::DOUBLE_LINE_SEPARATOR],     // row 2
+ ["column1", "column2", "column3"]    // row 3
+]);
+```
 
 Additionally, the following methods are available:
 - `highlightWord ($word, $color, $column = NULL)`
