@@ -61,8 +61,8 @@ The config class has the following constructor parameters:
 
 
 - array of options. The following are currently available:
-  - **borderPadding**: Adds 1-char-padding at the borders (left and right) 
-  - **border**: Adds a border [2]. 
+  - **borderPadding**: Adds 1-char-padding at the borders (left and right). Default is none. 
+  - **border**: Adds a border [2]. Default is none.
   - **paddingChar**: Changes the padding character. default is a whitespace.
   - **wrapColumns**: Specifies if lines should be wrapped or shortened. Default is wrapped.
   
@@ -72,32 +72,38 @@ The config class has the following constructor parameters:
   - `Config::DOUBLE_LINE_SEPARATOR`: Renders a line of equal signs (=)
   - `Config::EMPTY_LINE_SEPARATOR`: Renders an empty line
 
-```
-$output = $formatter->format([
- ["column1", "column2", "column3"],   // row 1
- [Config::DOUBLE_LINE_SEPARATOR],     // row 2
- ["column1", "column2", "column3"]    // row 3
-]);
-```
+  ```
+  $output = $formatter->format([
+   ["column1", "column2", "column3"],   // row 1
+   [Config::DOUBLE_LINE_SEPARATOR],     // row 2
+   ["column1", "column2", "column3"]    // row 3
+  ]);
+  ```
 
 Additionally, the following methods are available:
 - `highlightWord ($word, $color, $column = NULL)`
-  - Highlights a word with a color. The last parameter is optional. If missing, the word is highlighted in all columns. See example A.
+  - Highlights a word with a color. The last parameter is optional. If missing, the word is highlighted in all columns. See this example:
+    
+    ```
+    $warningColor = Color::fromColor(Color::LIGHT_GREY, Color::RED);
+    $config->highlightWord("[ERROR]", $warningColor, 3);
+    ```
+    Highlights the string "[ERROR]" in 3rd column with red background and lightgrey text color.
+
+
 - `setSequencesToIgnore (array $sequences)`
-  - Specifies character sequences which should be completely ignored by layouting mechanism. This is useful when you want to output formatting data for a printer for example. See example B.
+  - Specifies character sequences which should be completely ignored by layouting mechanism. This is useful when you want to output formatting data for a printer for example. See this example:
+    
+    ```
+    $config->setSequencesToIgnore(["//BOLD", "//ITALIC", "//OFF"]);
+    ```
+    These strings are completely ignored by the layout, for example "//BOLDHaus//OFF" is regarded as if it would be "Haus" only
 
-Example A:
-```
-$warningColor = Color::fromColor(Color::LIGHT_GREY, Color::RED);
-$config->highlightWord("[ERROR]", $warningColor, 3);
-```
-Highlights the string "[ERROR]" in 3rd column with red background and lightgrey text color.
 
-Example B:
-```
-$config->setSequencesToIgnore(["//BOLD", "//ITALIC", "//OFF"]);
-```
-These strings are completely ignored by the layout, for example "//BOLDHaus//OFF" is regarded as if it would be "Haus" only 
+
+
+- `setLeftColumnPadding(int $column, int $leftPadding)`
+  - Specifies how much left-padding is applied on $column
 
 # Alignments
 While left, center and right alignments are quite self-explanatory, left-right alignment might not be.

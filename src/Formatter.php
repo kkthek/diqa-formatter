@@ -77,11 +77,12 @@ class Formatter
     private function alignColumn($columnValue, int $column): string
     {
         $columnWidth = $this->config->getColumnWidth($column);
+        $leftPadding = str_repeat($this->config->paddingChar(), $this->config->getLeftColumnPadding($column));
         switch ($this->config->getAlignments($column)) {
             case Config::LEFT_ALIGN:
             default:
                 $this->checkColumnInput($columnValue);
-                $columnLine = $this->textUtilities->rightPad($columnValue, $columnWidth);
+                $columnLine = $leftPadding . $this->textUtilities->rightPad($columnValue, $columnWidth);
                 break;
             case Config::RIGHT_ALIGN:
                 $this->checkColumnInput($columnValue);
@@ -95,9 +96,9 @@ class Formatter
                 // if line consists of left and right part do left and right alignment
                 // otherwise just do left alignment
                 if (is_array($columnValue)) {
-                    $columnLine = $this->textUtilities->leftAndRightPad($columnValue[0], $columnValue[1], $columnWidth);
+                    $columnLine = $leftPadding. $this->textUtilities->leftAndRightPad($columnValue[0], $columnValue[1], $columnWidth);
                 } else {
-                    $columnLine = $this->textUtilities->rightPad($columnValue, $columnWidth);
+                    $columnLine = $leftPadding . $this->textUtilities->rightPad($columnValue, $columnWidth);
                 }
                 break;
         }

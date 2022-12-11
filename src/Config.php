@@ -16,12 +16,14 @@ class Config
     public const DOUBLE_LINE_SEPARATOR = "__DOUBLELINE_SEPERATOR__";
     public const EMPTY_LINE_SEPARATOR = "__EMPTY_LINE_SEPERATOR__";
 
-    private $columnWidths;
+    private $configuredColumnWidths;
+    private $effectiveColumnWidths;
     private $alignments;
     private $options;
 
     private $highlights;
     private $sequencesToIgnore;
+    private $leftColumnPaddings;
 
     /**
      * Formatting configuration.
@@ -33,7 +35,8 @@ class Config
      */
     public function __construct(array $columnWidths, array $alignments = null, array $options = null)
     {
-        $this->columnWidths = $columnWidths;
+        $this->effectiveColumnWidths = $columnWidths;
+        $this->configuredColumnWidths = $columnWidths;
         $this->alignments = $alignments;
         if (!is_null($alignments) && count($alignments) !== count($columnWidths)) {
             throw new Exception("Number of columns and alignments must match");
@@ -42,18 +45,11 @@ class Config
 
         $this->highlights = [];
 
-        if ($this->hasBorderPadding()) {
-            for ($i = 0; $i < count($columnWidths) ; $i++) {
-                $this->columnWidths[$i] -= 2;
-            }
-        }
-        if ($this->hasBorder()) {
-            $this->columnWidths[0]--;
-            for ($i = 0; $i < count($columnWidths) ; $i++) {
-                $this->columnWidths[$i]--;
-            }
-        }
+
         $this->sequencesToIgnore = [];
+        $this->leftColumnPaddings = [];
+
+        $this->recalculateColumnWidths();
     }
 
     /**
@@ -106,7 +102,7 @@ class Config
      */
     public function getColumnWidth(int $index): int
     {
-        return $this->columnWidths[$index];
+        return $this->effectiveColumnWidths[$index];
     }
 
     /**
@@ -116,7 +112,7 @@ class Config
      */
     public function getNumberOfColumns(): int
     {
-        return count($this->columnWidths);
+        return count($this->effectiveColumnWidths);
     }
 
     /**
@@ -153,4 +149,30 @@ class Config
         return $this->options['wrapColumns'] ?? true;
     }
 
+    public function setLeftColumnPadding(int $column, int $leftPadding) {
+        $this->leftColumnPaddings[$column] = $leftPadding;
+        $this->recalculateColumnWidths();
+    }
+
+    public function getLeftColumnPadding($column): int {
+        return $this->leftColumnPaddings[$column] ?? 0;
+    }
+
+    private function recalculateColumnWidths() {
+        $this->effectiveColumnWidths = $this->configuredColumnWidths;
+        if ($this->hasBorderPadding()) {
+            for ($i = 0; $i < count($this->effectiveColumnWidths) ; $i++) {
+                $this->effectiveColumnWidths[$i] -= 2;
+            }
+        }
+        if ($this->hasBorder()) {
+            $this->effectiveColumnWidths[0]--;
+            for ($i = 0; $i < count($this->effectiveColumnWidths) ; $i++) {
+                $this->effectiveColumnWidths[$i]--;
+            }
+        }
+        foreach($this->leftColumnPaddings as $column => $leftPadding) {
+            $this->effectiveColumnWidths[$column] -= $leftPadding;
+        }
+    }
 }
