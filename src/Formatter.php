@@ -51,7 +51,11 @@ class Formatter
             if ($rows[$j] === Config::LINE_SEPARATOR
                 || $rows[$j] === Config::DOUBLE_LINE_SEPARATOR
                 || $rows[$j] === Config::EMPTY_LINE_SEPARATOR) {
-                $rows[$j] = $this->formatSeparator($rows[$j]);
+                $columns = [];
+                for ($i = 0; $i < $this->config->getNumberOfColumns(); $i++) {
+                    $columns[] = $rows[$j];
+                }
+                $rows[$j] = $columns;
             }
 
             if ($this->config->hasBorder()) {
@@ -63,7 +67,12 @@ class Formatter
         if ($this->config->hasBorder()) {
             $resultLines[] = $this->formatBorder(count($rows), count($rows));
         }
-        return implode("\n", $resultLines);
+
+        $prefix = "";
+        if ($this->config->lineFeed()) {
+            $prefix = "\n";
+        }
+        return $prefix . implode("\n", $resultLines);
     }
 
     /**
@@ -96,7 +105,7 @@ class Formatter
                 // if line consists of left and right part do left and right alignment
                 // otherwise just do left alignment
                 if (is_array($columnValue)) {
-                    $columnLine = $leftPadding. $this->textUtilities->leftAndRightPad($columnValue[0], $columnValue[1], $columnWidth);
+                    $columnLine = $leftPadding . $this->textUtilities->leftAndRightPad($columnValue[0], $columnValue[1], $columnWidth);
                 } else {
                     $columnLine = $leftPadding . $this->textUtilities->rightPad($columnValue, $columnWidth);
                 }
@@ -118,8 +127,10 @@ class Formatter
     {
         $linesOfRow = [];
         for ($c = 0; $c < count($row); $c++) {
-            if ($row[$c] === Config::EMPTY_LINE_SEPARATOR) {
-                $linesOfRow[] = [str_repeat(self::EMPTY_LINE, $this->config->getColumnWidth($c))];
+            if ($row[$c] === Config::LINE_SEPARATOR
+                || $row[$c] === Config::DOUBLE_LINE_SEPARATOR
+                || $row[$c] === Config::EMPTY_LINE_SEPARATOR) {
+                $linesOfRow[] = [ $this->formatSeparator($row[$c], $this->config->getColumnWidth($c)) ];
                 continue;
             }
             $columnWidth = $this->config->getColumnWidth($c);
@@ -203,29 +214,21 @@ class Formatter
     /**
      * Add a separator line if necessary.
      *
-     * @param mixed $row all columns of a row
-     * @return array
+     * @param string $separatorType
+     * @param int $length Length of column
+     * @return string
      */
-    private function formatSeparator($row): array
+    private function formatSeparator(string $separatorType, int $length): string
     {
-        $columns = [];
-        if ($row === Config::LINE_SEPARATOR) {
-            for ($i = 0; $i < $this->config->getNumberOfColumns(); $i++) {
-                $columns[] = str_repeat(self::SINGLE_LINE, $this->config->getColumnWidth($i));
-            }
-
-        } else if ($row === Config::DOUBLE_LINE_SEPARATOR) {
-            for ($i = 0; $i < $this->config->getNumberOfColumns(); $i++) {
-                $columns[] = str_repeat(self::DOUBLE_LINE, $this->config->getColumnWidth($i));
-            }
-
-        } else if ($row === Config::EMPTY_LINE_SEPARATOR) {
-            for ($i = 0; $i < $this->config->getNumberOfColumns(); $i++) {
-                $columns[] = Config::EMPTY_LINE_SEPARATOR;
-            }
-
+        $separator = '';
+        if ($separatorType === Config::LINE_SEPARATOR) {
+            $separator = self::SINGLE_LINE;
+        } else if ($separatorType === Config::DOUBLE_LINE_SEPARATOR) {
+            $separator = self::DOUBLE_LINE;
+        } else if ($separatorType === Config::EMPTY_LINE_SEPARATOR) {
+            $separator = self::EMPTY_LINE;
         }
-        return $columns;
+        return str_repeat($separator, $length);
     }
 
     /**

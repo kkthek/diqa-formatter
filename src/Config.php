@@ -35,7 +35,6 @@ class Config
      */
     public function __construct(array $columnWidths, array $alignments = null, array $options = null)
     {
-        $this->effectiveColumnWidths = $columnWidths;
         $this->configuredColumnWidths = $columnWidths;
         $this->alignments = $alignments;
         if (!is_null($alignments) && count($alignments) !== count($columnWidths)) {
@@ -44,8 +43,6 @@ class Config
         $this->options = is_null($options) ? [] : $options;
 
         $this->highlights = [];
-
-
         $this->sequencesToIgnore = [];
         $this->leftColumnPaddings = [];
 
@@ -142,6 +139,11 @@ class Config
     public function paddingChar(): string
     {
         return $this->options['paddingChar'] ?? ' ';
+    }
+
+    public function lineFeed(): string
+    {
+        return $this->options['lineFeed'] ?? false;
     }
 
     public function wrapColumns(): string
